@@ -1,4 +1,6 @@
+# NodeJS
 node_modules
+*.yaml
 
 # Output
 .output
