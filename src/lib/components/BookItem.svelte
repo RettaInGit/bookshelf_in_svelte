@@ -17,7 +17,13 @@
 	);
 
 	$effect(() => {
-		if (editingTitle) focusAtEnd(titleEl);
+		if (!titleEl) return;
+		if (editingTitle) {
+			focusAtEnd(titleEl);
+		} else {
+			if (titleEl.childElementCount > 0) titleEl.textContent = book.title;  // a paste can leave styled markup behind
+			titleEl.scrollLeft = 0;
+		}
 	});
 
 	function startEditTitle(e) {
@@ -159,6 +165,7 @@
 			<button
 				class="editBookTitleButton"
 				title={editingTitle ? 'Save book title' : 'Edit book title'}
+				onmousedown={(e) => e.preventDefault()}
 				onclick={editingTitle ? saveTitle : startEditTitle}
 			>
 				{#if editingTitle}
@@ -176,7 +183,7 @@
 			<h2
 				class="bookTitle"
 				bind:this={titleEl}
-				contenteditable={editingTitle}
+				contenteditable={editingTitle ? 'plaintext-only' : 'false'}
 				onblur={editingTitle ? handleTitleBlur : undefined}
 				onkeypress={handleTitleKeypress}
 				onclick={handleTitleClick}

@@ -156,7 +156,12 @@ svg path {
     justify-content: flex-end;
 }
 
+#mainHeaderLeft {
+    min-width: 0;
+}
+
 #selectedShelfTitle {
+    min-width: 0;
     font-size: 28px;
     font-weight: 700;
     text-decoration: none;
@@ -170,13 +175,22 @@ svg path {
     text-decoration: underline;
 }
 
+#selectedShelfTitleText {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 #arrowIcon {
+    flex-shrink: 0;
     transition: transform 0.3s;
     margin-right: 5px;
 }
 
 #bookShelves {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);  /* an implicit column is min-content sized, so long titles widen it */
     position: fixed;
     top: 80px; /* mainHeader.height + mainHeader.paddingTop + mainHeader.paddingBottom */
     left: 0;
@@ -196,12 +210,14 @@ svg path {
 }
 
 #shelfList {
+    min-width: 0;
     margin: 0;
     padding: 0;
 }
 
 .editShelfTitleButton {
     background-color: transparent;
+    flex-shrink: 0;
     width: 20px;
     height: 20px;
     border: none;
@@ -219,6 +235,7 @@ svg path {
     font-size: 20px;
     text-decoration: none;
     flex-grow: 1;
+    min-width: 0;  /* a flex item won't shrink below its text without this, and pushes its siblings out */
     padding: 0;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -229,7 +246,7 @@ svg path {
     text-decoration: underline;
 }
 
-.shelfTitle[contenteditable="true"] {
+.shelfTitle[contenteditable="plaintext-only"] {
     outline: 2px solid var(--color-button-primary);
     background-color: var(--color-background);
     border-radius: 4px;
@@ -237,6 +254,7 @@ svg path {
 
 .moveShelfHandler, .removeShelfButton, .movePageHandler, .bookLock {
     background-color: transparent;
+    flex-shrink: 0;
     width: 20px;
     height: 20px;
     border: none;
@@ -405,16 +423,23 @@ svg path {
 }
 
 .pageList {
+    grid-template-columns: minmax(0, 1fr);
+    min-width: 0;
     padding: 0;
     margin: 0;
 }
 
 .pageListItem {
     display: flex;
+    min-width: 0;
     align-items: center;
     padding: 10px 15px;
     background-color: var(--color-page-bg);
     border-bottom: 1px solid var(--color-border-page);
+}
+
+.pageListItem > input, .pageListItem > img {
+    flex-shrink: 0;
 }
 
 .pageListItem.sortable-ghost {
@@ -436,6 +461,7 @@ svg path {
     color: var(--color-text-secondary);
     font-size: 16px;
     flex-grow: 1;
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -447,6 +473,7 @@ svg path {
 
 .bookListItem {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     margin: 10px 0;
     border: 1px solid var(--color-border-page);
     border-radius: 8px;
@@ -456,6 +483,7 @@ svg path {
 }
 
 .bookHeader, .bookHeaderTop, .bookHeaderBottom {
+    min-width: 0;
     align-items: center;
     cursor: pointer;
     background-color: var(--color-book-bg);
@@ -473,6 +501,7 @@ svg path {
 
 .editBookTitleButton {
     background-color: transparent;
+    flex-shrink: 0;
     width: 23px;
     height: 23px;
     border: none;
@@ -501,13 +530,14 @@ svg path {
 .bookTitle {
     font-family: 'Lora', serif;
     flex-grow: 1;
+    min-width: 0;
     padding: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.bookTitle[contenteditable="true"] {
+.bookTitle[contenteditable="plaintext-only"] {
     outline: 2px solid var(--color-button-primary);
     background-color: var(--color-background);
     border-radius: 4px;
@@ -515,6 +545,7 @@ svg path {
 
 .pagesCount {
     font-family: 'Lora', serif;
+    flex-shrink: 0;
     color: var(--color-text-accent);
     margin: 0 5px 0 15px;
     padding: 0;

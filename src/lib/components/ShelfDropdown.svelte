@@ -45,8 +45,18 @@
 		bs.removeShelf(shelfId);
 	}
 
+	let editedShelfEl = null;
+
 	$effect(() => {
-		if (editingShelfId) focusAtEnd(titleEls[editingShelfId]);
+		if (editingShelfId) {
+			editedShelfEl = titleEls[editingShelfId];
+			focusAtEnd(editedShelfEl);
+		} else if (editedShelfEl) {
+			// the trimmed text is what was just saved, so it also drops markup a paste left behind
+			if (editedShelfEl.childElementCount > 0) editedShelfEl.textContent = editedShelfEl.textContent.trim();
+			editedShelfEl.scrollLeft = 0;
+			editedShelfEl = null;
+		}
 	});
 
 	$effect(() => {
@@ -74,6 +84,7 @@
 				<button
 					class="editShelfTitleButton"
 					title={editingShelfId === shelf.id ? 'Save shelf title' : 'Edit shelf title'}
+					onmousedown={(e) => e.preventDefault()}
 					onclick={(e) => editingShelfId === shelf.id ? saveShelfTitle(shelf.id, e) : startEditShelf(shelf.id, e)}
 				>
 					{#if editingShelfId === shelf.id}
@@ -90,7 +101,7 @@
 				<!-- svelte-ignore a11y_no_static_element_interactions -->
 				<h2
 					class="shelfTitle"
-					contenteditable={editingShelfId === shelf.id}
+					contenteditable={editingShelfId === shelf.id ? 'plaintext-only' : 'false'}
 					bind:this={titleEls[shelf.id]}
 					onclick={() => handleSelectShelf(shelf.id)}
 					onblur={editingShelfId === shelf.id ? () => handleShelfTitleBlur(shelf.id) : undefined}
