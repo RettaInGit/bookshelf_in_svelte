@@ -1,42 +1,32 @@
-# sv
+# OVERVIEW
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+Turn your browser into an organized library! This extension acts like a personal bookshelf for your browser. Save your open pages, arrange them like books on a shelf, and instantly revisit them whenever you need. Download it from the [Chrome Web Store](https://chromewebstore.google.com/detail/bookshelf/bmgphchchbdajdapnomkmbhiolapbple).
 
-## Creating a project
+This project is a new implementation of [bookshelf](https://github.com/RettaInGit/bookshelf), which I rewrote with the help of Claude Code. It uses SvelteKit, a full-stack framework, to maintain the code clear and the application fast.
 
-If you're seeing this, you've probably already done this step. Congrats!
 
-```sh
-# create a new project
-npx sv create my-app
-```
+# FEATURES
 
-To recreate this project with the same configuration:
+An enhanced version of [OneTab](https://www.one-tab.com/) where you can more easily change the order of your saved pages and also split them into multiple instances based on different conceptual areas (here called 'shelves').
 
-```sh
-# recreate this project
-pnpm dlx sv@0.15.1 create --template minimal --no-types --install pnpm bookshelf_in_svelte
-```
 
-## Developing
+# LICENSE
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+This is an open source project, you can download and modify it as you like.
 
-```sh
-npm run dev
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
+# HOW TO BUILD
 
-## Building
+Running `pnpm build` creates the `build` folder which contains the actual code used by this extension.
 
-To create a production version of your app:
 
-```sh
-npm run build
-```
+# FUTURE IMPLEMENTATIONS
 
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+- [x] Use the checkbox to multi-select the pages to drag and drop
+- [ ] Pin favorite books
+- [ ] Check duplicate pages inside a book
+- [ ] Sort pages or books by name
+- [ ] Visualize only X pages if there are more than X in a book
+- [ ] Add settings in the settings page
+- [ ] All text should be only in one row (add "..." at the end if it's too long)
+- [ ] Page names should be editable
