@@ -1,5 +1,6 @@
 <script>
-	import Sortable from 'sortablejs/modular/sortable.complete.esm.js';  // 'complete' mounts the MultiDrag plugin
+	import Sortable from 'sortablejs/modular/sortable.esm.js';  // mounts AutoScroll, not MultiDrag
+	import { dragBehaviour } from '$lib/utils/dragSelection.js';
 	import BookItem from './BookItem.svelte';
 	import { bs } from '$lib/state/bookshelf.svelte.js';
 	import { generateUUID } from '$lib/utils/uuid.js';
@@ -26,6 +27,7 @@
 			group: { name: 'movePages' },
 			swapThreshold: 0.9,
 			animation: 150,
+			...dragBehaviour('button, input'),
 
 			onEnd(evt) {
 				const shelf = bs.bookshelfData.find((s) => s.id === bs.selectedShelfId);
@@ -36,7 +38,7 @@
 				if (!bookDragged) return;
 
 				let pagesDragged = $state.snapshot(bookDragged.pages);  // structuredClone() cannot clone state proxies
-				let newIndex = evt.newIndicies.length > 0 ? evt.newIndicies[0].index : evt.newIndex;
+				let newIndex = evt.newIndex;
 
 				if (evt.from === evt.to) {
 					// ── Book reorder ──────────────────────────────────────────────
@@ -90,7 +92,6 @@
 					bs.markDirty();
 				}
 
-				if (evt.from !== evt.to || newIndex !== itemIndex) listEl?.click();
 			}
 		});
 

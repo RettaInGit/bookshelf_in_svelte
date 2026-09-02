@@ -63,9 +63,4 @@
 	>
 		{page.title}
 	</a>
-	<button class="movePageHandler" title="Move this page, click to multi-select">
-		<svg viewBox="0 -0.125 0.8 0.8" width="20px" height="20px">
-			<path d="M.75.45a.05.05 0 0 1 0 .1h-.7a.05.05 0 0 1 0-.1zm0-.225a.05.05 0 0 1 0 .1h-.7a.05.05 0 0 1 0-.1zM.75 0a.05.05 0 0 1 0 .1h-.7a.05.05 0 0 1 0-.1z" />
-		</svg>
-	</button>
 </li>

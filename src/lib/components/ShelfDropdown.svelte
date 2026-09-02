@@ -1,7 +1,8 @@
 <script>
-	import Sortable from 'sortablejs/modular/sortable.complete.esm.js';  // 'complete' mounts the MultiDrag plugin
+	import Sortable from 'sortablejs/modular/sortable.esm.js';  // mounts AutoScroll, not MultiDrag  ('complete' mounts the MultiDrag plugin)
 	import { bs } from '$lib/state/bookshelf.svelte.js';
 	import { focusAtEnd } from '$lib/utils/editable.js';
+	import { dragBehaviour } from '$lib/utils/dragSelection.js';
 
 	let shelfListEl = $state(null);
 	let editingShelfId = $state(null);
@@ -63,8 +64,8 @@
 		if (!shelfListEl) return;
 		const sortable = Sortable.create(shelfListEl, {
 			group: { name: 'moveShelf' },
-			handle: '.moveShelfHandler',
 			animation: 150,
+			...dragBehaviour('button'),
 			onEnd(evt) {
 				if (evt.oldIndex >= bs.bookshelfData.length || evt.newIndex >= bs.bookshelfData.length) return;
 				if (evt.newIndex !== evt.oldIndex) {
@@ -107,12 +108,6 @@
 					onblur={editingShelfId === shelf.id ? () => handleShelfTitleBlur(shelf.id) : undefined}
 					onkeypress={(e) => handleShelfTitleKeypress(shelf.id, e)}
 				>{shelf.title}</h2>
-
-				<button class="moveShelfHandler" title="Move this shelf">
-					<svg viewBox="0 -0.125 0.8 0.8" width="20px" height="20px" fill="currentColor">
-						<path d="M.75.45a.05.05 0 0 1 0 .1h-.7a.05.05 0 0 1 0-.1zm0-.225a.05.05 0 0 1 0 .1h-.7a.05.05 0 0 1 0-.1zM.75 0a.05.05 0 0 1 0 .1h-.7a.05.05 0 0 1 0-.1z"/>
-					</svg>
-				</button>
 
 				<button class="removeShelfButton" title="Remove this shelf" onclick={(e) => handleRemoveShelf(shelf.id, e)}>
 					<svg viewBox="0 0 30 30" width="20px" height="20px" fill="currentColor">

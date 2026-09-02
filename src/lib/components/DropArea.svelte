@@ -1,11 +1,18 @@
 <script>
-	import Sortable from 'sortablejs/modular/sortable.complete.esm.js';  // 'complete' mounts the MultiDrag plugin
+	import Sortable from 'sortablejs/modular/sortable.esm.js';  // mounts AutoScroll, not MultiDrag
+	import { collectDragSet, markTravelling, clearTravelling, animateArrival, dragBehaviour } from '$lib/utils/dragSelection.js';
 	import PageItem from './PageItem.svelte';
 	import { bs } from '$lib/state/bookshelf.svelte.js';
 	import { generateUUID } from '$lib/utils/uuid.js';
 
 	let listEl = $state(null);
 	let dropAreaCheckboxEl = $state(null);
+
+	// Staged pages arrive by drag, which fires no change event on their checkboxes.
+	$effect(() => {
+		bs.pagesToMove.map((p) => p.id).join();
+		updateDropAreaCheckbox();
+	});
 
 	function updateDropAreaCheckbox() {
 		if (!dropAreaCheckboxEl) return;
@@ -34,21 +41,25 @@
 	$effect(() => {
 		if (!listEl) return;
 		const bookListEl = document.getElementById('bookList');
+		let dragSet = { rows: [], indexes: [] };
 
 		const sortable = Sortable.create(listEl, {
 			group: { name: 'movePages' },
-			multiDrag: true,
-			selectedClass: 'pageSelected',
-			handle: '.movePageHandler',
 			animation: 150,
+			...dragBehaviour('input'),
+
+			onStart(evt) {
+				dragSet = collectDragSet(listEl, evt.item);
+				markTravelling(dragSet.rows, evt.item);
+			},
 
 			onEnd(evt) {
+				clearTravelling();
 				const shelf = bs.bookshelfData.find((s) => s.id === bs.selectedShelfId);
 				if (!shelf) return;
 
-				const itemsDragged = evt.items.length > 0 ? evt.items : [evt.item];
-				const itemIndexes =
-					evt.oldIndicies.length > 0 ? evt.oldIndicies.map((i) => i.index) : [evt.oldIndex];
+				const { rows: itemsDragged, indexes: itemIndexes } = dragSet;
+				const travelling = itemsDragged.filter((item) => item !== evt.item);
 
 				let pagesDragged = Array.from(itemIndexes, (idx) => bs.pagesToMove[idx]);
 				const draggedSet = new Set(pagesDragged);
@@ -56,12 +67,18 @@
 				bs.pagesToMove.length = 0;
 				bs.pagesToMove.push(...remaining);
 
-				let newIndex = evt.newIndicies.length > 0 ? evt.newIndicies[0].index : evt.newIndex;
+				// Sortable moved only the grabbed row, so evt.newIndex is measured in a DOM that
+				// still holds the travelling rows, while the arrays spliced below have them
+				// removed already. Count the drop slot in that same space.
+				const travellingSet = new Set(travelling);
+				const dropSlot = Array.from(evt.to.children).filter((el) => !travellingSet.has(el)).indexOf(evt.item);
+				let newIndex = dropSlot === -1 ? evt.newIndex : dropSlot;
 
 				if (evt.from === evt.to) {
 					// ── Reorder within drop area ──────────────────────────────────
 					bs.pagesToMove.splice(newIndex, 0, ...pagesDragged);
 					bs.markDirty();
+					animateArrival(listEl, travelling.map((item) => item.dataset.pageId));
 				} else if (evt.to === bookListEl) {
 					// ── Drop area → bookList (create new book) ────────────────────
 					let newBookId;
@@ -76,7 +93,7 @@
 					};
 
 					shelf.books.splice(newIndex, 0, newBook);
-					itemsDragged.forEach((item) => bookListEl?.removeChild(item));
+					itemsDragged.forEach((item) => item.remove());
 
 					pagesDragged.forEach((page) => {
 						const startShelf = bs.bookshelfData.find((s) => s.id === page.shelfId);
@@ -88,6 +105,7 @@
 						}
 					});
 					bs.markDirty();
+					animateArrival(bookListEl, newBook.pages.map((p) => p.id));
 				} else {
 					// ── Drop area → existing book ─────────────────────────────────
 					const endBookId = evt.to.closest('.bookListItem')?.dataset.bookId;
@@ -119,9 +137,9 @@
 					// Drop the elements Sortable transplanted: both lists are redrawn from the data
 					itemsDragged.forEach((item) => item.remove());
 					bs.markDirty();
+					animateArrival(evt.to, cleanPages.map((p) => p.id));
 				}
 
-				if (evt.from !== evt.to || newIndex !== itemIndexes[0]) bookListEl?.click();
 			}
 		});
 

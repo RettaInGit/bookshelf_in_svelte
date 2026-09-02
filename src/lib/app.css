@@ -252,7 +252,7 @@ svg path {
     border-radius: 4px;
 }
 
-.moveShelfHandler, .removeShelfButton, .movePageHandler, .bookLock {
+.removeShelfButton, .bookLock {
     background-color: transparent;
     flex-shrink: 0;
     width: 20px;
@@ -267,13 +267,9 @@ svg path {
     height: 28px;
 }
 
-.moveShelfHandler:hover, .removeShelfButton:hover, .movePageHandler:hover, .bookLock:hover {
+.removeShelfButton:hover, .bookLock:hover {
     background-color: transparent;
     opacity: 0.8;
-}
-
-.moveShelfHandler:hover, .movePageHandler:hover {
-    cursor: grab;
 }
 
 .shelfListItem, #addNewShelfButton {
@@ -442,14 +438,32 @@ svg path {
     flex-shrink: 0;
 }
 
+.pageListItem, .shelfListItem, .bookHeader {
+    cursor: grab;
+}
+
+.pageListItem:active, .shelfListItem:active, .bookHeader:active {
+    cursor: grabbing;
+}
+
+.pageTravelling {
+    opacity: 0.35;
+    transition: opacity 0.15s ease;
+}
+
+.pageArriving {
+    animation: pageArrive 0.15s ease;
+}
+
+@keyframes pageArrive {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: none; }
+}
+
 .pageListItem.sortable-ghost {
     background-color: var(--color-moveHere-bg);
     color: var(--color-text-accent);
     border: 1px dashed var(--color-text-accent);
-}
-
-.pageSelected {
-    border: 2px solid var(--color-text-accent) !important;
 }
 
 .pageMoved {
