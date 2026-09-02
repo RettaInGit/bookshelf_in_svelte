@@ -26,6 +26,11 @@
 		editingShelfId = null;
 	}
 
+	// Blur must not validate: alert() takes focus off the page, which would re-enter here
+	function handleShelfTitleBlur(shelfId) {
+		if (titleEls[shelfId]?.textContent?.trim()) saveShelfTitle(shelfId);
+	}
+
 	function handleShelfTitleKeypress(shelfId, e) {
 		if (e.key === 'Enter') { e.preventDefault(); saveShelfTitle(shelfId, e); }
 	}
@@ -88,7 +93,7 @@
 					contenteditable={editingShelfId === shelf.id}
 					bind:this={titleEls[shelf.id]}
 					onclick={() => handleSelectShelf(shelf.id)}
-					onblur={editingShelfId === shelf.id ? (e) => saveShelfTitle(shelf.id, e) : undefined}
+					onblur={editingShelfId === shelf.id ? () => handleShelfTitleBlur(shelf.id) : undefined}
 					onkeypress={(e) => handleShelfTitleKeypress(shelf.id, e)}
 				>{shelf.title}</h2>
 

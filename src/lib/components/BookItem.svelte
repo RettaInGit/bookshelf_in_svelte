@@ -37,6 +37,11 @@
 		editingTitle = false;
 	}
 
+	// Blur must not validate: alert() takes focus off the page, which would re-enter here
+	function handleTitleBlur() {
+		if (titleEl?.textContent?.trim()) saveTitle();
+	}
+
 	function handleTitleKeypress(e) {
 		if (e.key === 'Enter') { e.preventDefault(); saveTitle(e); }
 	}
@@ -172,7 +177,7 @@
 				class="bookTitle"
 				bind:this={titleEl}
 				contenteditable={editingTitle}
-				onblur={editingTitle ? saveTitle : undefined}
+				onblur={editingTitle ? handleTitleBlur : undefined}
 				onkeypress={handleTitleKeypress}
 				onclick={handleTitleClick}
 			>{book.title}</h2>
