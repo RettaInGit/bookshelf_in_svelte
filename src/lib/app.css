@@ -1,0 +1,664 @@
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Lora:wght@400;700&display=swap');
+
+:root {
+    /* --- Background Colors --- */
+    --color-background: #EEE7DD;
+    --color-header-bg: #C5B299;
+    --color-page-bg: #F0E3D1;
+    --color-book-bg: #C3B29D;
+
+    /* --- Text Colors --- */
+    --color-text-primary: #3B302A;
+    --color-text-secondary: #5C4F44;
+    --color-text-accent: #8B7A6A;
+    --color-text-light: #EEE7DD;
+
+    /* --- Button Colors --- */
+    --color-button-primary: #7B5E4A;
+    --color-button-primary-hover: #9B7355;
+    --color-button-remove: #A0522D;
+    --color-button-remove-hover: #8B4513;
+    --color-button-restore: #2E8B57;
+    --color-button-restore-hover: #3CB371;
+
+    /* --- Move Here Button Colors --- */
+    --color-moveHere-bg: #B4A391;
+    --color-moveHere-hover-bg: #CABBA7;
+
+    /* --- Border Colors --- */
+    --color-border-header: #A99988;
+    --color-border-page: #D4C6B2;
+    --color-border-search: #B3A292;
+
+    /* --- Other Colors --- */
+    --color-shadow: rgba(0, 0, 0, 0.1);
+}
+
+.darkTheme {
+    /* --- Background Colors --- */
+    --color-background: #5B4E41;
+    --color-header-bg: #3E362E;
+    --color-page-bg: #4A4238;
+    --color-book-bg: #41372D;
+
+    /* --- Text Colors --- */
+    --color-text-primary: #F5F1EB;
+    --color-text-secondary: #D6C8B8;
+    --color-text-accent: #BFAD9A;
+    --color-text-light: #BAA68C;
+
+    /* --- Button Colors --- */
+    --color-button-primary: #70584A;
+    --color-button-primary-hover: #8A6B58;
+    --color-button-remove: #7A513E;
+    --color-button-remove-hover: #6A4734;
+    --color-button-restore: #3A6B4A;
+    --color-button-restore-hover: #48855D;
+
+    /* --- Move Here Button Colors --- */
+    --color-moveHere-bg: #6F6255;
+    --color-moveHere-hover-bg: #837465;
+
+    /* --- Border Colors --- */
+    --color-border-header: #66584A;
+    --color-border-page: #7A6A5A;
+    --color-border-search: #5F5143;
+
+    /* --- Other Colors --- */
+    --color-shadow: rgba(0, 0, 0, 0.3);
+}
+
+body {
+    font-family: 'Merriweather', serif;
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    margin: 0;
+    padding: 0;
+}
+
+h2 {
+    color: var(--color-text-secondary);
+    margin: 0;
+}
+
+button {
+    background-color: var(--color-button-primary);
+    padding: 8px 16px;
+    color: var(--color-text-light);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin: 0px 5px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+button:hover {
+    background-color: var(--color-button-primary-hover);
+}
+
+input[type="checkbox"] {
+    background-color: var(--color-background);
+    cursor: pointer;
+    margin: 0 5px;
+    margin-right: 20px;
+}
+
+label {
+    font-size: 16px;
+}
+
+svg path {
+    fill: var(--color-text-secondary);
+}
+
+#resultMessage {
+    text-align: center;
+    margin-top: 20px;
+    color: var(--color-text-accent);
+}
+
+.emptyBookMessage {
+    text-align: center;
+    margin: 0;
+    padding: 15px;
+    background-color: var(--color-page-bg);
+    color: var(--color-text-accent);
+    font-style: italic;
+}
+
+#mainHeader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--color-header-bg);
+    padding: 15px 40px;
+    border-bottom: 1px solid var(--color-border-header);
+    box-shadow: 0 2px 4px var(--color-shadow);
+}
+
+#mainHeaderLeft, #mainHeaderCenter, #mainHeaderRight {
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+#mainHeaderCenter {
+    justify-content: center;
+}
+
+#mainHeaderRight {
+    justify-content: flex-end;
+}
+
+#selectedShelfTitle {
+    font-size: 28px;
+    font-weight: 700;
+    text-decoration: none;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+#selectedShelfTitle:hover {
+    text-decoration: underline;
+}
+
+#arrowIcon {
+    transition: transform 0.3s;
+    margin-right: 5px;
+}
+
+#bookShelves {
+    display: grid;
+    position: fixed;
+    top: 80px; /* mainHeader.height + mainHeader.paddingTop + mainHeader.paddingBottom */
+    left: 0;
+    width: 420px;
+    background-color: var(--color-header-bg);
+    border: 1px solid var(--color-border-header);
+    list-style-type: none;
+    margin: 0;
+    padding: 5px 10px;
+    box-shadow: 0 2px 4px var(--color-shadow);
+    transition: left 0.3s ease;
+    overflow: hidden;
+}
+
+#bookShelves.close {
+    left: -440px;
+}
+
+#shelfList {
+    margin: 0;
+    padding: 0;
+}
+
+.editShelfTitleButton {
+    background-color: transparent;
+    width: 20px;
+    height: 20px;
+    border: none;
+    padding: 0;
+    margin: 0 5px 0 0;
+}
+
+.editShelfTitleButton:hover {
+    background-color: transparent;
+    opacity: 0.8;
+}
+
+.shelfTitle {
+    font-family: 'Lora', serif;
+    font-size: 20px;
+    text-decoration: none;
+    flex-grow: 1;
+    padding: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.shelfTitle[contenteditable="false"]:hover {
+    text-decoration: underline;
+}
+
+.shelfTitle[contenteditable="true"] {
+    outline: 2px solid var(--color-button-primary);
+    background-color: var(--color-background);
+    border-radius: 4px;
+}
+
+.moveShelfHandler, .removeShelfButton, .movePageHandler, .bookLock {
+    background-color: transparent;
+    width: 20px;
+    height: 20px;
+    border: none;
+    padding: 0;
+    margin: 0 0 0 5px;
+}
+
+.bookLock {
+    width: 22px;
+    height: 28px;
+}
+
+.moveShelfHandler:hover, .removeShelfButton:hover, .movePageHandler:hover, .bookLock:hover {
+    background-color: transparent;
+    opacity: 0.8;
+}
+
+.moveShelfHandler:hover, .movePageHandler:hover {
+    cursor: grab;
+}
+
+.shelfListItem, #addNewShelfButton {
+    display: flex;
+    align-items: center;
+    color: var(--color-text-secondary);
+    font-size: 16px;
+    border-radius: 4px;
+    background-color: var(--color-page-bg);
+    padding: 5px;
+    margin: 5px 0;
+    cursor: pointer;
+}
+
+#addNewShelfButton:hover {
+    text-decoration: underline;
+}
+
+#searchBar {
+    width: 100%;
+    max-width: 400px;
+    padding: 10px 14px;
+    font-size: 16px;
+    border: 2px solid var(--color-border-search);
+    border-radius: 4px;
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+}
+
+#searchBar:focus, #importExportTextArea:focus {
+    outline: none !important;
+    border: 3px solid var(--color-text-accent);
+    padding: 9px 13px;
+}
+
+#searchBar::placeholder {
+    color: var(--color-text-accent);
+    opacity: 1;
+}
+
+#themeToggleButton, #importExportButton, #settingsPageButton {
+    background-color: transparent;
+    width: 36px;
+    height: 36px;
+    border: none;
+    padding: 0;
+    margin-left: 10px;
+}
+
+#themeToggleButton:hover, #importExportButton:hover, #settingsPageButton:hover {
+    opacity: 0.8;
+}
+
+#mainBody {
+    margin-top: 90px;
+    padding: 0 20px;
+    padding-bottom: 0;
+}
+
+#mainPage {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+#viewOverlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.4);
+}
+
+#viewOverlay.open {
+    display: block;
+}
+
+#importExportPopup {
+    position: fixed;
+    min-width: 800px;
+    max-width: 95%;
+    height: 600px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--color-page-bg);
+    border: 1px solid var(--color-border-page);
+    box-shadow: 0 0 10px var(--color-shadow);
+    border-radius: 20px;
+    display: none;
+    padding: 20px;
+}
+
+#importExportPopup.open {
+    display: flex;
+    flex-direction: column;
+}
+
+#importExportTextArea {
+    flex-grow: 1;
+    min-width: 760px;
+    max-width: calc(100% - 35px);
+    resize: horizontal;
+    font-size: 16px;
+    border: 2px solid var(--color-border-page);
+    border-radius: 5px 5px 20px 20px;
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    padding: 10px 14px;
+    scrollbar-width: none;
+}
+
+#importButton, #exportButton {
+    flex-grow: 1;
+    height: 40px;
+    margin: 20px 5px;
+}
+
+#settingsPage {
+    position: fixed;
+    top: 0;
+    right: -440px; /* width + padding-left + padding-right */
+    width: 400px;
+    height: 100%;
+    background-color: var(--color-page-bg);
+    box-shadow: -2px 0 5px var(--color-shadow);
+    padding: 20px;
+    transition: right 0.3s ease;
+    display: block;
+    overflow-y: auto;
+}
+
+#settingsPage.open {
+    right: 0;
+}
+
+#bookList {
+    display: grid;
+    width: 100%;
+    max-width: 1000px;
+}
+
+.pageList {
+    padding: 0;
+    margin: 0;
+}
+
+.pageListItem {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: var(--color-page-bg);
+    border-bottom: 1px solid var(--color-border-page);
+}
+
+.pageListItem.sortable-ghost {
+    background-color: var(--color-moveHere-bg);
+    color: var(--color-text-accent);
+    border: 1px dashed var(--color-text-accent);
+}
+
+.pageSelected {
+    border: 2px solid var(--color-text-accent) !important;
+}
+
+.pageMoved {
+    border: 1px dashed var(--color-text-accent);
+}
+
+.pageLink {
+    text-decoration: none;
+    color: var(--color-text-secondary);
+    font-size: 16px;
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pageLink:hover {
+    text-decoration: underline;
+}
+
+.bookListItem {
+    display: grid;
+    margin: 10px 0;
+    border: 1px solid var(--color-border-page);
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: var(--color-page-bg);
+    border-bottom: none;
+}
+
+.bookHeader, .bookHeaderTop, .bookHeaderBottom {
+    align-items: center;
+    cursor: pointer;
+    background-color: var(--color-book-bg);
+}
+
+.bookHeader {
+    display: grid;
+    padding: 15px;
+}
+
+.bookHeaderTop {
+    display: flex;
+    margin-bottom: 5px;
+}
+
+.editBookTitleButton {
+    background-color: transparent;
+    width: 23px;
+    height: 23px;
+    border: none;
+    padding: 0;
+    margin: 0 15px 0 0;
+}
+
+.editBookTitleButton:hover {
+    background-color: transparent;
+    opacity: 0.8;
+}
+
+.bookHeaderBottomDivider {
+    flex-grow: 1;
+}
+
+.bookHeaderBottom {
+    display: flex;
+    margin-top: 5px;
+}
+
+.bookCheckbox, #dropAreaCheckbox {
+    margin-right: 10px;
+}
+
+.bookTitle {
+    font-family: 'Lora', serif;
+    flex-grow: 1;
+    padding: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.bookTitle[contenteditable="true"] {
+    outline: 2px solid var(--color-button-primary);
+    background-color: var(--color-background);
+    border-radius: 4px;
+}
+
+.pagesCount {
+    font-family: 'Lora', serif;
+    color: var(--color-text-accent);
+    margin: 0 5px 0 15px;
+    padding: 0;
+}
+
+.removeSelectedPagesButton {
+    background-color: var(--color-button-remove);
+}
+
+.removeSelectedPagesButton:hover {
+    background-color: var(--color-button-remove-hover);
+}
+
+.restoreSelectedPagesButton {
+    background-color: var(--color-button-restore);
+}
+
+.restoreSelectedPagesButton:hover {
+    background-color: var(--color-button-restore-hover);
+}
+
+#dropAreaButton {
+    position: fixed;
+    background-color: var(--color-header-bg);
+    bottom: 20px;
+    right: 20px;
+    width: 150px;
+    height: 150px;
+    padding: 0;
+    margin: 0;
+    border-radius: 10%;
+    font-size: 48px;
+    border: none;
+    cursor: pointer;
+    z-index: 1000;
+    transition: all 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#dropAreaButton:hover {
+    transform: scale(1.05);
+}
+
+#dropAreaSpace {
+    width: 0%;
+    transition: all 0.3s ease;
+}
+
+#dropArea {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    position: fixed;
+    bottom: 190px;
+    right: 20px;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    background-color: var(--color-page-bg);
+    border: 1px solid var(--color-border-page);
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    opacity: 0;
+}
+
+#dropArea.active {
+    width: calc(50% - 40px);
+    height: calc(100% - 290px);
+    opacity: 1;
+}
+
+#dropArea.hidden {
+    display: none;
+}
+
+#dropAreaHeader {
+    display: flex;
+    padding: 15px;
+    background-color: var(--color-book-bg);
+}
+
+#dropAreaList {
+    display: inline-block;
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    overflow-y: auto;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: var(--color-border-page);
+    transition: .4s;
+    border-radius: 20px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background-color: var(--color-page-bg);
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider:before {
+    transform: translateX(20px);
+}
+
+.toggle-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+}
+
+.toggle-group > span {
+    color: var(--color-text-accent);
+    transition: color 0.3s ease, font-weight 0.3s ease;
+}
+
+.toggle-group:has(input:not(:checked)) > span:first-of-type,
+.toggle-group:has(input:checked) > span:last-of-type {
+    color: var(--color-text-primary);
+    font-weight: bold;
+}

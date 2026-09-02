@@ -1,7 +1,7 @@
 {
 	"name": "bookshelf-in-svelte",
 	"private": true,
-	"version": "0.0.1",
+	"version": "2.0.0",
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
@@ -10,10 +10,13 @@
 		"prepare": "svelte-kit sync || echo ''"
 	},
 	"devDependencies": {
-		"@sveltejs/adapter-auto": "^7.0.1",
+		"@sveltejs/adapter-static": "^3.0.8",
 		"@sveltejs/kit": "^2.57.0",
 		"@sveltejs/vite-plugin-svelte": "^7.0.0",
 		"svelte": "^5.55.2",
 		"vite": "^8.0.7"
+	},
+	"dependencies": {
+		"sortablejs": "^1.15.6"
 	}
 }
