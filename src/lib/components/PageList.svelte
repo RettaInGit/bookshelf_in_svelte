@@ -4,6 +4,7 @@
 	import PageItem from './PageItem.svelte';
 	import { bs } from '$lib/state/bookshelf.svelte.js';
 	import { generateUUID } from '$lib/utils/uuid.js';
+	import { dragAnimation, newBookFlags } from '$lib/state/settings.svelte.js';
 
 	/** @type {{ book: any, shelfId: string, bookListEl: HTMLElement | null }} */
 	let { book, shelfId, bookListEl } = $props();
@@ -37,7 +38,7 @@
 
 		const sortable = Sortable.create(listEl, {
 			group: { name: 'movePages' },
-			animation: 150,
+			animation: dragAnimation(),
 			...dragBehaviour('input'),
 
 			onStart(evt) {
@@ -82,8 +83,7 @@
 						id: newBookId,
 						title: `Book ${shelf.books.length + 1}`,
 						pages: $state.snapshot(pagesDragged),
-						collapsed: false,
-						locked: false
+						...newBookFlags()
 					};
 
 					pagesDragged.forEach((page) => {
@@ -145,6 +145,7 @@
 					// Drop the elements Sortable transplanted: both lists are redrawn from the data
 					itemsDragged.forEach((item) => item.remove());
 					bs.markDirty();
+					bs.tidy();
 					animateArrival(evt.to, pagesDragged.map((p) => p.id));
 				}
 
@@ -157,7 +158,7 @@
 
 <ul class="pageList" bind:this={listEl} style:display={book.collapsed ? 'none' : 'grid'}>
 	{#each book.pages as page (page.id)}
-		{@const visible = page.title.toLowerCase().includes(bs.searchQuery.toLowerCase())}
+		{@const visible = bs.matches(page)}
 		<PageItem
 			{page}
 			bookId={book.id}

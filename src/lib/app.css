@@ -140,6 +140,12 @@ svg path {
     }
 }
 
+.reducedMotion *, .reducedMotion *::before, .reducedMotion *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+}
+
 #resultMessage {
     text-align: center;
     margin-top: 20px;
@@ -332,7 +338,7 @@ svg path {
     opacity: 1;
 }
 
-#themeToggleButton, #importExportButton, #settingsPageButton {
+#importExportButton, #settingsPageButton {
     background-color: transparent;
     width: 36px;
     height: 36px;
@@ -341,7 +347,7 @@ svg path {
     margin-left: 10px;
 }
 
-#themeToggleButton:hover, #importExportButton:hover, #settingsPageButton:hover {
+#importExportButton:hover, #settingsPageButton:hover {
     opacity: 0.8;
 }
 
@@ -419,9 +425,10 @@ svg path {
 #settingsPage {
     position: fixed;
     top: 0;
-    right: -440px; /* width + padding-left + padding-right */
+    right: -400px; /* its own width, padding included */
     width: 400px;
     height: 100%;
+    box-sizing: border-box;  /* or the padding pushes the last section past the viewport */
     background-color: var(--color-page-bg);
     box-shadow: -2px 0 5px var(--color-shadow);
     padding: 20px;
@@ -434,10 +441,125 @@ svg path {
     right: 0;
 }
 
+#settingsHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--color-border-page);
+}
+
+#settingsHeader h2 {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+#settingsCloseButton {
+    background-color: transparent;
+    color: var(--color-text-secondary);
+    padding: 4px;
+    margin: 0;
+    line-height: 0;
+}
+
+#settingsCloseButton:hover {
+    background-color: transparent;
+    opacity: 0.7;
+}
+
+.settingsSection {
+    margin-top: 25px;
+    padding-left: 15px;
+}
+
+/* the heading stays flush with the panel edge, the options it groups are indented */
+.settingsSection h3 {
+    margin: 0 0 0 -15px;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-muted);
+}
+
+.settingsRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--color-border-page);
+}
+
+.settingsRow:last-child {
+    border-bottom: none;
+}
+
+.settingsRowText {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.settingsRowText > span {
+    font-size: 15px;
+    color: var(--color-text-primary);
+}
+
+.settingsRowText > small {
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--color-text-muted);
+}
+
+/* Segmented control: the accent is too light in the dark theme to sit under light text */
+.settingsChoice {
+    display: flex;
+    flex-shrink: 0;
+    border: 1px solid var(--color-border-page);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.settingsChoice > button {
+    background-color: transparent;
+    color: var(--color-text-muted);
+    border-radius: 0;
+    margin: 0;
+    padding: 6px 10px;
+    font-size: 13px;
+}
+
+.settingsChoice > button:hover {
+    background-color: var(--color-selected-bg);
+}
+
+.settingsChoice > button.selected {
+    background-color: var(--color-button-primary);
+    color: var(--color-text-light);
+}
+
+
+.settingsLinks {
+    display: flex;
+    gap: 10px;
+    padding-top: 12px;
+}
+
+.settingsLinks > button {
+    flex: 1;
+    margin: 0;
+}
+
 #bookList {
     display: grid;
     width: 100%;
     max-width: 1000px;
+}
+
+#bookList.fullWidth {
+    max-width: none;
 }
 
 .pageList {
@@ -456,8 +578,13 @@ svg path {
     border-bottom: 1px solid var(--color-border-page);
 }
 
-.pageListItem > input, .pageListItem > img {
+.pageListItem > input, .pageListItem > img, .pageIconPlaceholder {
     flex-shrink: 0;
+}
+
+.pageIconPlaceholder {
+    margin-right: 10px;
+    opacity: 0.5;
 }
 
 .pageListItem, .shelfListItem, .bookHeader {
@@ -510,6 +637,27 @@ svg path {
 
 .pageLink:hover {
     text-decoration: underline;
+}
+
+/* With the address shown the anchor becomes two stacked lines, so the clipping moves
+   from the anchor onto each of them. */
+.pageLink.withUrl {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    white-space: normal;
+}
+
+.pageLink.withUrl > span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pageLinkUrl {
+    font-size: 12px;
+    color: var(--color-text-muted);
 }
 
 .bookListItem {

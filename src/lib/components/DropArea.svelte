@@ -4,6 +4,7 @@
 	import PageItem from './PageItem.svelte';
 	import { bs } from '$lib/state/bookshelf.svelte.js';
 	import { generateUUID } from '$lib/utils/uuid.js';
+	import { confirmAction, dragAnimation, newBookFlags } from '$lib/state/settings.svelte.js';
 
 	let listEl = $state(null);
 	let dropAreaCheckboxEl = $state(null);
@@ -33,7 +34,7 @@
 		const checkboxes = Array.from(listEl?.querySelectorAll('.pageCheckbox') ?? []);
 		const indexes = checkboxes.map((cb, i) => cb.checked ? i : -1).filter((i) => i !== -1);
 		if (indexes.length === 0) { alert('Please select at least one page to remove.'); return; }
-		if (!confirm(`Are you sure you want to remove the selected page${indexes.length !== 1 ? 's' : ''}?`)) return;
+		if (!confirmAction(`Are you sure you want to remove the selected page${indexes.length !== 1 ? 's' : ''}?`)) return;
 		indexes.sort((a, b) => b - a).forEach((idx) => bs.pagesToMove.splice(idx, 1));
 		if (dropAreaCheckboxEl) { dropAreaCheckboxEl.checked = false; dropAreaCheckboxEl.indeterminate = false; }
 	}
@@ -45,7 +46,7 @@
 
 		const sortable = Sortable.create(listEl, {
 			group: { name: 'movePages' },
-			animation: 150,
+			animation: dragAnimation(),
 			...dragBehaviour('input'),
 
 			onStart(evt) {
@@ -88,8 +89,7 @@
 						id: newBookId,
 						title: `Book ${shelf.books.length + 1}`,
 						pages: $state.snapshot(pagesDragged.map(({ bookId: _b, shelfId: _s, ...rest }) => rest)),
-						collapsed: false,
-						locked: false
+						...newBookFlags()
 					};
 
 					shelf.books.splice(newIndex, 0, newBook);
@@ -137,6 +137,7 @@
 					// Drop the elements Sortable transplanted: both lists are redrawn from the data
 					itemsDragged.forEach((item) => item.remove());
 					bs.markDirty();
+					bs.tidy();
 					animateArrival(evt.to, cleanPages.map((p) => p.id));
 				}
 

@@ -1,4 +1,5 @@
 import { generateUUID } from '$lib/utils/uuid.js';
+import { settings, newBookFlags } from '$lib/state/settings.svelte.js';
 
 class BookshelfStore {
 	// ── Core data ───────────────────────────────────────────────────────────────
@@ -7,7 +8,8 @@ class BookshelfStore {
 	pagesToMove = $state([]); // { id, title, url, shelfId, bookId }
 
 	// ── UI state ─────────────────────────────────────────────────────────────────
-	theme = $state('light');
+	themePreference = $state('system');  // 'light' | 'dark' | 'system'
+	systemDark = $state(false);         // kept in sync with prefers-color-scheme by Header
 	searchQuery = $state('');
 	shelvesOpen = $state(false);
 	dropAreaOpen = $state(false);
@@ -24,8 +26,63 @@ class BookshelfStore {
 		return this.bookshelfData.find((s) => s.id === this.selectedShelfId);
 	}
 
+	// The theme actually painted: 'system' resolves against the OS preference
+	get theme() {
+		if (this.themePreference === 'system') return this.systemDark ? 'dark' : 'light';
+		return this.themePreference;
+	}
+
 	markDirty() {
 		this.bookshelfDataUpdated = true;
+	}
+
+	// searchQuery arrives already trimmed and lowercased from the header
+	matches(page) {
+		if (!this.searchQuery) return true;
+		if (page.title.toLowerCase().includes(this.searchQuery)) return true;
+		return settings.searchUrls && page.url.toLowerCase().includes(this.searchQuery);
+	}
+
+	// The housekeeping the settings ask for, in one entry point every caller that adds
+	// pages can use. Duplicates keep their first occurrence; the shelf-wide scope subsumes
+	// the per-book one, so having both on behaves like the shelf alone.
+	tidy(shelfId = this.selectedShelfId) {
+		const perBook = settings.removeDuplicatesInBook;
+		const perShelf = settings.removeDuplicatesInShelf;
+		if (!perBook && !perShelf && !settings.removeEmptyBooks) return;
+
+		const shelf = this.bookshelfData.find((s) => s.id === shelfId);
+		if (!shelf) return;
+		let changed = false;
+
+		if (perBook || perShelf) {
+			const seen = new Set();
+			for (const book of shelf.books) {
+				if (!perShelf) seen.clear();
+				const doomed = [];
+				book.pages.forEach((page, i) => {
+					if (seen.has(page.url)) doomed.push(i);
+					else seen.add(page.url);
+				});
+				for (let i = doomed.length - 1; i >= 0; i--) {
+					const [dropped] = book.pages.splice(doomed[i], 1);
+					const moveIdx = this.pagesToMove.findIndex(
+						(item) => item.shelfId === shelfId && item.bookId === book.id && item.id === dropped.id
+					);
+					if (moveIdx !== -1) this.pagesToMove.splice(moveIdx, 1);
+					changed = true;
+				}
+			}
+		}
+
+		// Opting in covers the books that were already empty, not only the ones just emptied
+		if (settings.removeEmptyBooks) {
+			for (let i = shelf.books.length - 1; i >= 0; i--) {
+				if (shelf.books[i].pages.length === 0) { shelf.books.splice(i, 1); changed = true; }
+			}
+		}
+
+		if (changed) this.markDirty();
 	}
 
 	// ── Shelf mutations ───────────────────────────────────────────────────────────
@@ -116,7 +173,7 @@ class BookshelfStore {
 					}
 				} else if (line.startsWith('    ')) {
 					if (currentShelf) {
-						currentBook = { id: generateUUID(), title: line.trim(), pages: [], collapsed: false, locked: false };
+						currentBook = { id: generateUUID(), title: line.trim(), pages: [], ...newBookFlags() };
 						currentShelf.books.push(currentBook);
 					}
 				} else {
@@ -133,13 +190,18 @@ class BookshelfStore {
 
 		if (!importAsNewShelf) {
 			const shelf = this.bookshelfData.find((s) => s.id === this.selectedShelfId);
-			if (shelf) shelf.books.unshift(...newData.flatMap((s) => s.books));
+			const imported = newData.flatMap((s) => s.books);
+			if (shelf) {
+				if (settings.newBooksAtBottom) shelf.books.push(...imported);
+				else shelf.books.unshift(...imported);
+			}
 		} else {
 			this.bookshelfData.push(...newData);
 			this.selectedShelfId = newData[0].id;
 		}
 
 		this.markDirty();
+		this.tidy();
 		return true;
 	}
 

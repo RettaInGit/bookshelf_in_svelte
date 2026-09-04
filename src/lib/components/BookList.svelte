@@ -1,6 +1,7 @@
 <script>
 	import Sortable from 'sortablejs/modular/sortable.esm.js';  // mounts AutoScroll, not MultiDrag
 	import { dragBehaviour } from '$lib/utils/dragSelection.js';
+	import { settings, dragAnimation } from '$lib/state/settings.svelte.js';
 	import BookItem from './BookItem.svelte';
 	import { bs } from '$lib/state/bookshelf.svelte.js';
 	import { generateUUID } from '$lib/utils/uuid.js';
@@ -12,8 +13,7 @@
 		const shelf = bs.currentShelf;
 		if (!shelf) return 'Error when loading the shelf. Try to reload the extension.';
 		if (shelf.books.length === 0) return 'No pages saved. Try adding some.';
-		const q = bs.searchQuery.toLowerCase();
-		if (q && !shelf.books.some((b) => b.pages.some((p) => p.title.toLowerCase().includes(q)))) {
+		if (bs.searchQuery && !shelf.books.some((b) => b.pages.some((p) => bs.matches(p)))) {
 			return 'No pages match your search.';
 		}
 		return '';
@@ -26,7 +26,7 @@
 		const sortable = Sortable.create(listEl, {
 			group: { name: 'movePages' },
 			swapThreshold: 0.9,
-			animation: 150,
+			animation: dragAnimation(),
 			...dragBehaviour('button, input'),
 
 			onEnd(evt) {
@@ -103,7 +103,7 @@
 	<p id="resultMessage">{resultMessage}</p>
 {/if}
 
-<div id="bookList" bind:this={listEl}>
+<div id="bookList" class:fullWidth={settings.fullWidthLayout} bind:this={listEl}>
 	{#each bs.currentShelf?.books ?? [] as book (book.id)}
 		<BookItem {book} shelfId={bs.selectedShelfId} bookListEl={listEl} />
 	{/each}

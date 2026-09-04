@@ -1,14 +1,17 @@
+import { settings } from '$lib/state/settings.svelte.js';
+
 const isChromeExtension =
 	typeof chrome !== 'undefined' && !!chrome?.storage?.local;
 
 export async function loadFromStorage() {
 	if (isChromeExtension) {
-		return chrome.storage.local.get(['selectedShelfId', 'bookshelfData', 'themeSelected']);
+		return chrome.storage.local.get(['selectedShelfId', 'bookshelfData', 'themeSelected', 'settings']);
 	}
 	return {
 		bookshelfData: JSON.parse(localStorage.getItem('bookshelfData') || 'null'),
 		selectedShelfId: localStorage.getItem('selectedShelfId') || null,
-		themeSelected: localStorage.getItem('themeSelected') || 'light'
+		themeSelected: localStorage.getItem('themeSelected') || 'system',
+		settings: JSON.parse(localStorage.getItem('settings') || 'null')
 	};
 }
 
@@ -38,8 +41,15 @@ export function onExternalUpdate(callback) {
 
 export function openTab(url) {
 	if (isChromeExtension) {
-		chrome.tabs.create({ url });
+		chrome.tabs.create({ url, active: !settings.openInBackground });
 	} else {
 		window.open(url, '_blank');
 	}
 }
+
+// Null outside the extension: there is no manifest to read the version from.
+export function getVersion() {
+	if (typeof chrome === 'undefined' || !chrome?.runtime?.getManifest) return null;
+	return chrome.runtime.getManifest().version;
+}
+

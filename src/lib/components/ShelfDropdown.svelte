@@ -3,6 +3,7 @@
 	import { bs } from '$lib/state/bookshelf.svelte.js';
 	import { focusAtEnd } from '$lib/utils/editable.js';
 	import { dragBehaviour } from '$lib/utils/dragSelection.js';
+	import { confirmAction, dragAnimation } from '$lib/state/settings.svelte.js';
 
 	let shelfListEl = $state(null);
 	let editingShelfId = $state(null);
@@ -39,9 +40,9 @@
 	function handleRemoveShelf(shelfId, e) {
 		e.stopPropagation();
 		if (shelfId === bs.selectedShelfId) {
-			if (!confirm('Are you sure you want to reset this shelf?')) return;
+			if (!confirmAction('Are you sure you want to reset this shelf?')) return;
 		} else {
-			if (!confirm('Are you sure you want to remove this shelf?')) return;
+			if (!confirmAction('Are you sure you want to remove this shelf?')) return;
 		}
 		bs.removeShelf(shelfId);
 	}
@@ -64,7 +65,7 @@
 		if (!shelfListEl) return;
 		const sortable = Sortable.create(shelfListEl, {
 			group: { name: 'moveShelf' },
-			animation: 150,
+			animation: dragAnimation(),
 			...dragBehaviour('button'),
 			onEnd(evt) {
 				if (evt.oldIndex >= bs.bookshelfData.length || evt.newIndex >= bs.bookshelfData.length) return;

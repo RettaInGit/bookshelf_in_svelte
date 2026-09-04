@@ -6,6 +6,7 @@
 	import ImportExportPopup from '$lib/components/ImportExportPopup.svelte';
 	import SettingsPage from '$lib/components/SettingsPage.svelte';
 	import { bs } from '$lib/state/bookshelf.svelte.js';
+	import { settings, applySettings } from '$lib/state/settings.svelte.js';
 	import { loadFromStorage, saveToStorage, onExternalUpdate } from '$lib/chrome/storage.js';
 	import { generateUUID } from '$lib/utils/uuid.js';
 
@@ -29,7 +30,9 @@
 			}
 		}
 
-		bs.theme = data.themeSelected ?? 'light';
+		bs.themePreference = data.themeSelected ?? 'system';
+		applySettings(data.settings);
+		bs.tidy();  // the settings are in place, so this honours the options the user chose
 		bs.loadingBookshelfData = false;
 	}
 
@@ -49,6 +52,13 @@
 		bs.importExportOpen = false;
 		bs.settingsOpen = false;
 	}
+
+	// Hiding the button would otherwise leave an open drop area with no way to close it
+	$effect(() => {
+		if (!settings.hideDropAreaButton) return;
+		bs.dropAreaOpen = false;
+		bs.dropAreaHidden = true;
+	});
 
 	onMount(() => {
 		loadData();
@@ -105,6 +115,7 @@
 <SettingsPage />
 <DropArea />
 
+{#if !settings.hideDropAreaButton}
 <button
 	id="dropAreaButton"
 	title="Place pages here to move them more easily between books and shelves"
@@ -116,3 +127,4 @@
 		<path d="m961.099 300.431-44.439-3.545v169.847l-217.008 46.665c-10.142 2.227-20.694 2.227-30.835.083L460.548 469.7c-3.71-.824-6.432-4.04-6.514-7.832l-3.627-138.847c-.082-4.37 3.215-8.08 7.503-8.492l176.937-15.5c3.051-.247 5.689-2.227 6.844-5.112l42.544-103.227v283.216l192.271-36.525V293.588l-113.264-7.183a24.74 24.74 0 0 1-20.994-14.541l-58.673-130.479-58.952 132.826a8.38 8.38 0 0 1-6.678 4.864L409.429 300.1c-6.349.66-10.966-5.854-8.245-11.707l55.489-118.645c1.154-2.391 3.38-4.123 5.936-4.617l213.875-39.246 7.091-1.319 6.924 1.236 218.492 39.329c2.639.495 4.864 2.226 6.019 4.699l54.252 118.975c2.639 5.772-1.896 12.121-8.163 11.626"/>
 	</svg>
 </button>
+{/if}

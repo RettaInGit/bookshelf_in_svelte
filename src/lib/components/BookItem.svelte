@@ -1,6 +1,7 @@
 <script>
 	import PageList from './PageList.svelte';
 	import { bs } from '$lib/state/bookshelf.svelte.js';
+	import { settings, confirmAction } from '$lib/state/settings.svelte.js';
 	import { openTab } from '$lib/chrome/storage.js';
 	import { focusAtEnd } from '$lib/utils/editable.js';
 
@@ -11,9 +12,7 @@
 	let titleEl = $state(null);
 
 	const hasVisiblePage = $derived(
-		book.pages.length === 0 ||
-		bs.searchQuery === '' ||
-		book.pages.some((p) => p.title.toLowerCase().includes(bs.searchQuery.toLowerCase()))
+		book.pages.length === 0 || book.pages.some((p) => bs.matches(p))
 	);
 
 	$effect(() => {
@@ -89,12 +88,12 @@
 		const selectedIndexes = pageCheckboxes.map((cb, i) => cb.checked ? i : -1).filter((i) => i !== -1);
 
 		if (selectedIndexes.length === 0) { alert('Please select at least one page to restore.'); return; }
-		if (!confirm(`Are you sure you want to restore the selected page${selectedIndexes.length !== 1 ? 's' : ''}?`)) return;
+		if (!confirmAction(`Are you sure you want to restore the selected page${selectedIndexes.length !== 1 ? 's' : ''}?`)) return;
 
 		const pagesToRestore = selectedIndexes.map((i) => b.pages[i]);
 		pagesToRestore.forEach((p) => openTab(p.url));
 
-		if (!b.locked) {
+		if (!b.locked && !settings.keepPagesOnRestore) {
 			if (pagesToRestore.length === b.pages.length) {
 				for (let i = bs.pagesToMove.length - 1; i >= 0; i--) {
 					const item = bs.pagesToMove[i];
@@ -130,7 +129,7 @@
 		const selectedIndexes = pageCheckboxes.map((cb, i) => cb.checked ? i : -1).filter((i) => i !== -1);
 
 		if (selectedIndexes.length === 0) { alert('Please select at least one page to remove.'); return; }
-		if (!confirm(`Are you sure you want to remove the selected page${selectedIndexes.length !== 1 ? 's' : ''}?`)) return;
+		if (!confirmAction(`Are you sure you want to remove the selected page${selectedIndexes.length !== 1 ? 's' : ''}?`)) return;
 
 		selectedIndexes.sort((a, bb) => bb - a).forEach((idx) => {
 			const pageId = b.pages[idx].id;
