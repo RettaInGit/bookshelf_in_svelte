@@ -65,6 +65,11 @@
 		bs.toggleBookLocked(shelfId, book.id);
 	}
 
+	function handlePinClick(e) {
+		e.stopPropagation();
+		bs.toggleBookPinned(shelfId, book.id);
+	}
+
 	let bookCheckboxEl = $state(null);
 
 	function handleBookCheckboxClick(e) {
@@ -214,6 +219,13 @@
 						<path d="M380.143 335.842v-4.706c0-3.833-2.953-7.175-6.785-7.29a7 7 0 0 0-7.215 6.996v5h-1a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h16a3 3 0 0 0 3-3v-10a3 3 0 0 0-3-3zm-3 0h-8v-5c0-3.079 3.334-5.004 6-3.464 1.238.714 2 2.035 2 3.464zm4 15h-16a2 2 0 0 1-2-2v-10a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2m-6-9c.001-1.54-1.665-2.503-2.998-1.734a2 2 0 0 0-.132 3.383l-.631 3.155a1 1 0 0 0 .981 1.196h1.56a1 1 0 0 0 .981-1.196l-.631-3.155c.525-.361.87-.964.87-1.649"/>
 					</svg>
 				{/if}
+			</button>
+
+			<!-- One glyph for both states: the paint is a class, since 'svg path' in app.css wins over a fill attribute -->
+			<button class="bookPin" class:pinned={book.pinned} title={book.pinned ? 'Unpin the book' : 'Pin the book'} onclick={handlePinClick}>
+				<svg width="26px" height="26px" viewBox="0 0 24 24">
+					<path transform="rotate(45 12 12)" d="M6 2.5H18V5h-3.5v7l5.5 3v1h-7l-1 7-1-7H4v-1l5.5-3V5H6Z"/>
+				</svg>
 			</button>
 		</div>
 	</div>

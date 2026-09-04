@@ -2,7 +2,7 @@
 	import Sortable from 'sortablejs/modular/sortable.esm.js';  // mounts AutoScroll, not MultiDrag
 	import { collectDragSet, markTravelling, clearTravelling, animateArrival, dragBehaviour } from '$lib/utils/dragSelection.js';
 	import PageItem from './PageItem.svelte';
-	import { bs } from '$lib/state/bookshelf.svelte.js';
+	import { bs, firstUnpinnedIndex } from '$lib/state/bookshelf.svelte.js';
 	import { generateUUID } from '$lib/utils/uuid.js';
 	import { confirmAction, dragAnimation, newBookFlags } from '$lib/state/settings.svelte.js';
 
@@ -92,7 +92,8 @@
 						...newBookFlags()
 					};
 
-					shelf.books.splice(newIndex, 0, newBook);
+					// A new book is never pinned, so it cannot land inside the pinned head
+					shelf.books.splice(Math.max(newIndex, firstUnpinnedIndex(shelf.books)), 0, newBook);
 					itemsDragged.forEach((item) => item.remove());
 
 					pagesDragged.forEach((page) => {

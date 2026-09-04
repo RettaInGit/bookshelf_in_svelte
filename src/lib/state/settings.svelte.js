@@ -21,6 +21,9 @@ export const DEFAULT_SETTINGS = {
 	removeDuplicatesInShelf: false,
 	removeEmptyBooks: false,
 
+	// ── Pinned books ──────────────────────────────────────────────────────────────
+	newPinsAtBottom: false,
+
 	// ── Restoring pages ───────────────────────────────────────────────────────────
 	keepPagesOnRestore: false,
 	openInBackground: false

@@ -230,6 +230,21 @@
 	</section>
 
 	<section class="settingsSection">
+		<h3>Pinned books</h3>
+
+		<div class="settingsRow">
+			<div class="settingsRowText">
+				<span>Add new pins at the bottom</span>
+				<small>Each new pin goes last among the pinned books.</small>
+			</div>
+			<label class="switch">
+				<input type="checkbox" bind:checked={settings.newPinsAtBottom} />
+				<span class="slider"></span>
+			</label>
+		</div>
+	</section>
+
+	<section class="settingsSection">
 		<h3>Restoring pages</h3>
 
 		<div class="settingsRow">

@@ -3,7 +3,7 @@
 	import { dragBehaviour } from '$lib/utils/dragSelection.js';
 	import { settings, dragAnimation } from '$lib/state/settings.svelte.js';
 	import BookItem from './BookItem.svelte';
-	import { bs } from '$lib/state/bookshelf.svelte.js';
+	import { bs, firstUnpinnedIndex } from '$lib/state/bookshelf.svelte.js';
 	import { generateUUID } from '$lib/utils/uuid.js';
 
 	let listEl = $state(null);
@@ -29,6 +29,17 @@
 			animation: dragAnimation(),
 			...dragBehaviour('button, input'),
 
+			// Pinned books hold the head of the list, and a move across that frontier is refused
+			// while it is still a preview: the placeholder never shows an order the data cannot
+			// hold, so DOM and data cannot drift apart.
+			onMove(evt) {
+				if (evt.from !== listEl || evt.to !== listEl) return true;
+				if (!evt.related?.classList.contains('bookListItem')) return true;
+				const books = bs.currentShelf?.books ?? [];
+				const isPinned = (el) => !!books.find((b) => b.id === el?.dataset.bookId)?.pinned;
+				return isPinned(evt.dragged) === isPinned(evt.related);
+			},
+
 			onEnd(evt) {
 				const shelf = bs.bookshelfData.find((s) => s.id === bs.selectedShelfId);
 				if (!shelf) return;
@@ -42,6 +53,19 @@
 
 				if (evt.from === evt.to) {
 					// ── Book reorder ──────────────────────────────────────────────
+					// onMove already refuses to cross the pinned frontier; this clamp is the net,
+					// and the DOM node has to come back with it: a clamp that cancels the move
+					// leaves the array untouched, so Svelte would have nothing to redraw.
+					const pinnedEnd = firstUnpinnedIndex(shelf.books);
+					const [first, last] = bookDragged.pinned
+						? [0, pinnedEnd - 1]
+						: [pinnedEnd, shelf.books.length - 1];
+					newIndex = Math.max(first, Math.min(newIndex, last));
+					if (newIndex !== evt.newIndex) {
+						evt.item.remove();
+						listEl.insertBefore(evt.item, listEl.children[newIndex] ?? null);
+					}
+
 					if (newIndex !== itemIndex) {
 						shelf.books.splice(newIndex, 0, shelf.books.splice(itemIndex, 1)[0]);
 					}

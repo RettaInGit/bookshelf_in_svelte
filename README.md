@@ -23,7 +23,7 @@ Running `pnpm build` creates the `build` folder which contains the actual code u
 # FUTURE IMPLEMENTATIONS
 
 - [x] Use the checkbox to multi-select the pages to drag and drop
-- [ ] Pin favorite books
+- [x] Pin favorite books
 - [x] Check duplicate pages inside a book
 - [ ] Sort pages or books by name
 - [ ] Visualize only X pages if there are more than X in a book

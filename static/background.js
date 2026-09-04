@@ -204,8 +204,13 @@ async function savePages(tabs, settings) {
     collapsed: settings.newBooksCollapsed,
     locked: settings.newBooksLocked
   };
-  if (settings.newBooksAtBottom) shelf.books.push(newBook);
-  else shelf.books.unshift(newBook);
+  // Pinned books hold the head of the list; mirrors firstUnpinnedIndex() in the app
+  if (settings.newBooksAtBottom) {
+    shelf.books.push(newBook);
+  } else {
+    const firstUnpinned = shelf.books.findIndex(book => !book.pinned);
+    shelf.books.splice(firstUnpinned === -1 ? shelf.books.length : firstUnpinned, 0, newBook);
+  }
 
   // Save the updated bookshelf data to storage
   chrome.storage.local.set({ 'selectedShelfId': selectedShelfId, 'bookshelfData': bookshelfData }, () => {

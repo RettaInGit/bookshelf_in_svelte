@@ -1,6 +1,13 @@
 import { generateUUID } from '$lib/utils/uuid.js';
 import { settings, newBookFlags } from '$lib/state/settings.svelte.js';
 
+// Pinned books hold the head of the list, so this is the first slot an unpinned one can
+// take. Read from the order itself: inserting here is right even if the two ever mix.
+export function firstUnpinnedIndex(books) {
+	const idx = books.findIndex((b) => !b.pinned);
+	return idx === -1 ? books.length : idx;
+}
+
 class BookshelfStore {
 	// ── Core data ───────────────────────────────────────────────────────────────
 	bookshelfData = $state([]);
@@ -147,6 +154,20 @@ class BookshelfStore {
 		if (book) { book.locked = !book.locked; this.markDirty(); }
 	}
 
+	// Pinning lifts the book into the pinned head of the list, unpinning drops it right
+	// below it: the two blocks never interleave, whichever way the flag goes.
+	toggleBookPinned(shelfId, bookId) {
+		const shelf = this.bookshelfData.find((s) => s.id === shelfId);
+		const idx = shelf?.books.findIndex((b) => b.id === bookId) ?? -1;
+		if (idx === -1) return;
+
+		const [book] = shelf.books.splice(idx, 1);
+		book.pinned = !book.pinned;
+		const atBottomOfBlock = !book.pinned || settings.newPinsAtBottom;
+		shelf.books.splice(atBottomOfBlock ? firstUnpinnedIndex(shelf.books) : 0, 0, book);
+		this.markDirty();
+	}
+
 	// ── Import/export helpers ─────────────────────────────────────────────────────
 	importText(text, importAsNewShelf) {
 		if (!text.trim()) return false;
@@ -193,7 +214,7 @@ class BookshelfStore {
 			const imported = newData.flatMap((s) => s.books);
 			if (shelf) {
 				if (settings.newBooksAtBottom) shelf.books.push(...imported);
-				else shelf.books.unshift(...imported);
+				else shelf.books.splice(firstUnpinnedIndex(shelf.books), 0, ...imported);
 			}
 		} else {
 			this.bookshelfData.push(...newData);
