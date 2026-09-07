@@ -41,8 +41,8 @@ export const SORT_OPTIONS = {
 		['manual', 'Manually'],
 		['titleAsc', 'By name A..Z'],
 		['titleDesc', 'By name Z..A'],
-		['urlAsc', 'By address A..Z'],
-		['urlDesc', 'By address Z..A']
+		['urlAsc', 'By URL A..Z'],
+		['urlDesc', 'By URL Z..A']
 	],
 	sortBooks: [
 		['manual', 'Manually'],

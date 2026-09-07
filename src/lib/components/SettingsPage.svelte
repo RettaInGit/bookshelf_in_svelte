@@ -71,8 +71,8 @@
 
 		<div class="settingsRow">
 			<div class="settingsRowText">
-				<span>Show page addresses</span>
-				<small>Adds the address under each page title, instead of only in its tooltip.</small>
+				<span>Show page URLs</span>
+				<small>Adds the URL under each page title, instead of only in its tooltip.</small>
 			</div>
 			<label class="switch">
 				<input type="checkbox" bind:checked={settings.showPageUrls} />
@@ -82,8 +82,8 @@
 
 		<div class="settingsRow">
 			<div class="settingsRowText">
-				<span>Search addresses too</span>
-				<small>The search box matches page addresses as well as titles.</small>
+				<span>Search URLs too</span>
+				<small>The search box matches page URLs as well as titles.</small>
 			</div>
 			<label class="switch">
 				<input type="checkbox" bind:checked={settings.searchUrls} />
@@ -94,7 +94,7 @@
 		<div class="settingsRow">
 			<div class="settingsRowText">
 				<span>Show website icons</span>
-				<small>Each icon is fetched from an external service, which sees the page addresses.</small>
+				<small>Each icon is fetched from an external service, which sees the page URLs.</small>
 			</div>
 			<label class="switch">
 				<input type="checkbox" bind:checked={settings.remoteFavicons} />
@@ -206,7 +206,7 @@
 		<div class="settingsRow">
 			<div class="settingsRowText">
 				<span>Remove duplicates in book</span>
-				<small>One page per address inside each book.</small>
+				<small>One page per URL inside each book.</small>
 			</div>
 			<label class="switch">
 				<input type="checkbox" checked={settings.removeDuplicatesInBook} onchange={tidyWith('removeDuplicatesInBook')} />
@@ -217,7 +217,7 @@
 		<div class="settingsRow">
 			<div class="settingsRowText">
 				<span>Remove duplicates in shelf</span>
-				<small>One page per address, even across different books.</small>
+				<small>One page per URL, even across different books.</small>
 			</div>
 			<label class="switch">
 				<input type="checkbox" checked={settings.removeDuplicatesInShelf} onchange={tidyWith('removeDuplicatesInShelf')} />

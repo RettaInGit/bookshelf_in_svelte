@@ -680,7 +680,7 @@ svg path {
     text-decoration: underline;
 }
 
-/* With the address shown the anchor becomes two stacked lines, so the clipping moves
+/* With the URL shown the anchor becomes two stacked lines, so the clipping moves
    from the anchor onto each of them. */
 .pageLink.withUrl {
     display: flex;
