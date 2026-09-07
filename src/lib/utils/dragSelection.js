@@ -21,6 +21,15 @@ export function clearTravelling() {
 	for (const el of document.querySelectorAll('.pageTravelling')) el.classList.remove('pageTravelling');
 }
 
+// Puts the row Sortable carried back where it was picked up. Needed wherever the drop is
+// not what decides the order: if the data then comes out unchanged Svelte redraws nothing,
+// and the DOM would be left holding a move the data never took.
+export function restoreRow(listEl, item, index) {
+	if (!listEl) return;
+	item.remove();
+	listEl.insertBefore(item, listEl.children[index] ?? null);
+}
+
 // Sortable animates the row it carried; the others only reappear once Svelte has
 // redrawn the lists, so they get their own arrival animation.
 export async function animateArrival(scopeEl, pageIds) {

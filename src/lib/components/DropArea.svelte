@@ -142,6 +142,7 @@
 					animateArrival(evt.to, cleanPages.map((p) => p.id));
 				}
 
+				bs.sortAll();
 			}
 		});
 

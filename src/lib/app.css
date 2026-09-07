@@ -560,6 +560,27 @@ svg path {
 }
 
 
+.settingsSelect {
+    flex-shrink: 0;
+    background-color: var(--color-page-bg);
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border-page);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.settingsSelect:hover {
+    background-color: var(--color-selected-bg);
+}
+
+.darkTheme .settingsSelect {
+    color-scheme: dark;  /* the open list is painted by the browser, not by these tokens */
+}
+
+
 .settingsLinks {
     display: flex;
     gap: 10px;

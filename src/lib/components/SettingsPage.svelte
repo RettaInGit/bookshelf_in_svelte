@@ -1,6 +1,6 @@
 <script>
 	import { bs } from '$lib/state/bookshelf.svelte.js';
-	import { settings } from '$lib/state/settings.svelte.js';
+	import { settings, SORT_OPTIONS } from '$lib/state/settings.svelte.js';
 	import { saveToStorage, openTab, getVersion } from '$lib/chrome/storage.js';
 
 	const SOURCE_URL = 'https://github.com/RettaInGit/bookshelf_in_svelte';
@@ -29,6 +29,14 @@
 		return (e) => {
 			settings[key] = e.currentTarget.checked;
 			bs.tidy();
+		};
+	}
+
+	// Same story for the sort options: the value has to be in place before the pass runs.
+	function sortWith(key) {
+		return (e) => {
+			settings[key] = e.currentTarget.value;
+			bs.sortAll();
 		};
 	}
 </script>
@@ -226,6 +234,45 @@
 				<input type="checkbox" checked={settings.removeEmptyBooks} onchange={tidyWith('removeEmptyBooks')} />
 				<span class="slider"></span>
 			</label>
+		</div>
+	</section>
+
+	<section class="settingsSection">
+		<h3>Sorting</h3>
+
+		<div class="settingsRow">
+			<div class="settingsRowText">
+				<span>Sort pages</span>
+				<small>How the pages inside each book are ordered.</small>
+			</div>
+			<select class="settingsSelect" value={settings.sortPages} onchange={sortWith('sortPages')}>
+				{#each SORT_OPTIONS.sortPages as [value, label] (value)}
+					<option {value}>{label}</option>
+				{/each}
+			</select>
+		</div>
+
+		<div class="settingsRow">
+			<div class="settingsRowText">
+				<span>Sort books</span>
+				<small>Pinned books are ordered among themselves, ahead of the others.</small>
+			</div>
+			<select class="settingsSelect" value={settings.sortBooks} onchange={sortWith('sortBooks')}>
+				{#each SORT_OPTIONS.sortBooks as [value, label] (value)}
+					<option {value}>{label}</option>
+				{/each}
+			</select>
+		</div>
+
+		<div class="settingsRow">
+			<div class="settingsRowText">
+				<span>Sort shelves</span>
+			</div>
+			<select class="settingsSelect" value={settings.sortShelves} onchange={sortWith('sortShelves')}>
+				{#each SORT_OPTIONS.sortShelves as [value, label] (value)}
+					<option {value}>{label}</option>
+				{/each}
+			</select>
 		</div>
 	</section>
 

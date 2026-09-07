@@ -1,10 +1,10 @@
 <script>
 	import Sortable from 'sortablejs/modular/sortable.esm.js';  // mounts AutoScroll, not MultiDrag
-	import { collectDragSet, markTravelling, clearTravelling, animateArrival, dragBehaviour } from '$lib/utils/dragSelection.js';
+	import { collectDragSet, markTravelling, clearTravelling, animateArrival, dragBehaviour, restoreRow } from '$lib/utils/dragSelection.js';
 	import PageItem from './PageItem.svelte';
 	import { bs, firstUnpinnedIndex } from '$lib/state/bookshelf.svelte.js';
 	import { generateUUID } from '$lib/utils/uuid.js';
-	import { dragAnimation, newBookFlags } from '$lib/state/settings.svelte.js';
+	import { settings, dragAnimation, newBookFlags } from '$lib/state/settings.svelte.js';
 
 	/** @type {{ book: any, shelfId: string, bookListEl: HTMLElement | null }} */
 	let { book, shelfId, bookListEl } = $props();
@@ -70,8 +70,14 @@
 
 				if (evt.from === evt.to) {
 					// ── Same-book reorder ─────────────────────────────────────────
-					startBook.pages = startBook.pages.filter((p) => !pagesDragged.includes(p));
-					startBook.pages.splice(newIndex, 0, ...pagesDragged);
+					if (settings.sortPages !== 'manual') {
+						// The sort owns the order, so Sortable's move is undone: were the pages to come
+						// out in the order they were already in, Svelte would have nothing to redraw.
+						restoreRow(listEl, evt.item, evt.oldIndex);
+					} else {
+						startBook.pages = startBook.pages.filter((p) => !pagesDragged.includes(p));
+						startBook.pages.splice(newIndex, 0, ...pagesDragged);
+					}
 					bs.markDirty();
 					animateArrival(listEl, travelling.map((item) => item.dataset.pageId));
 				} else if (evt.to === bookListEl) {
@@ -150,6 +156,7 @@
 					animateArrival(evt.to, pagesDragged.map((p) => p.id));
 				}
 
+				bs.sortAll();
 			}
 		});
 

@@ -1,6 +1,6 @@
 <script>
 	import Sortable from 'sortablejs/modular/sortable.esm.js';  // mounts AutoScroll, not MultiDrag
-	import { dragBehaviour } from '$lib/utils/dragSelection.js';
+	import { dragBehaviour, restoreRow } from '$lib/utils/dragSelection.js';
 	import { settings, dragAnimation } from '$lib/state/settings.svelte.js';
 	import BookItem from './BookItem.svelte';
 	import { bs, firstUnpinnedIndex } from '$lib/state/bookshelf.svelte.js';
@@ -53,21 +53,24 @@
 
 				if (evt.from === evt.to) {
 					// ── Book reorder ──────────────────────────────────────────────
-					// onMove already refuses to cross the pinned frontier; this clamp is the net,
-					// and the DOM node has to come back with it: a clamp that cancels the move
-					// leaves the array untouched, so Svelte would have nothing to redraw.
-					const pinnedEnd = firstUnpinnedIndex(shelf.books);
-					const [first, last] = bookDragged.pinned
-						? [0, pinnedEnd - 1]
-						: [pinnedEnd, shelf.books.length - 1];
-					newIndex = Math.max(first, Math.min(newIndex, last));
-					if (newIndex !== evt.newIndex) {
-						evt.item.remove();
-						listEl.insertBefore(evt.item, listEl.children[newIndex] ?? null);
-					}
+					if (settings.sortBooks !== 'manual') {
+						// The sort owns the order, so the drop is undone for the same reason the clamp
+						// below puts the node back: an untouched array gives Svelte nothing to redraw.
+						restoreRow(listEl, evt.item, itemIndex);
+					} else {
+						// onMove already refuses to cross the pinned frontier; this clamp is the net,
+						// and the DOM node has to come back with it: a clamp that cancels the move
+						// leaves the array untouched, so Svelte would have nothing to redraw.
+						const pinnedEnd = firstUnpinnedIndex(shelf.books);
+						const [first, last] = bookDragged.pinned
+							? [0, pinnedEnd - 1]
+							: [pinnedEnd, shelf.books.length - 1];
+						newIndex = Math.max(first, Math.min(newIndex, last));
+						if (newIndex !== evt.newIndex) restoreRow(listEl, evt.item, newIndex);
 
-					if (newIndex !== itemIndex) {
-						shelf.books.splice(newIndex, 0, shelf.books.splice(itemIndex, 1)[0]);
+						if (newIndex !== itemIndex) {
+							shelf.books.splice(newIndex, 0, shelf.books.splice(itemIndex, 1)[0]);
+						}
 					}
 					bs.markDirty();
 				} else if (evt.to === dropAreaListEl) {
@@ -116,6 +119,7 @@
 					bs.markDirty();
 				}
 
+				bs.sortAll();
 			}
 		});
 

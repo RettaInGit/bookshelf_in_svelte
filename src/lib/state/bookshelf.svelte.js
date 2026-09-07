@@ -1,11 +1,21 @@
 import { generateUUID } from '$lib/utils/uuid.js';
-import { settings, newBookFlags } from '$lib/state/settings.svelte.js';
+import { settings, newBookFlags, comparator } from '$lib/state/settings.svelte.js';
 
 // Pinned books hold the head of the list, so this is the first slot an unpinned one can
 // take. Read from the order itself: inserting here is right even if the two ever mix.
 export function firstUnpinnedIndex(books) {
 	const idx = books.findIndex((b) => !b.pinned);
 	return idx === -1 ? books.length : idx;
+}
+
+// Orders one slice of a list in place, so the pinned head and the unpinned tail of a book
+// list can be sorted on their own. Reports whether anything actually moved: an order that
+// is already right must not mark the data dirty.
+function sortRange(list, from, to, cmp) {
+	const slice = list.slice(from, to).sort(cmp);
+	if (slice.every((item, i) => item === list[from + i])) return false;
+	list.splice(from, slice.length, ...slice);
+	return true;
 }
 
 class BookshelfStore {
@@ -92,6 +102,36 @@ class BookshelfStore {
 		if (changed) this.markDirty();
 	}
 
+	// The order the settings ask for, in one entry point every caller that changes a list
+	// can use. Pinned books hold the head of their shelf, so a book list is two ranges each
+	// sorted on its own. The drop area stays out of it: it only stages pages.
+	sortAll() {
+		const shelfCmp = comparator(settings.sortShelves);
+		const bookCmp = comparator(settings.sortBooks);
+		const pageCmp = comparator(settings.sortPages);
+		if (!shelfCmp && !bookCmp && !pageCmp) return;
+
+		let changed = false;
+		if (shelfCmp) {
+			changed = sortRange(this.bookshelfData, 0, this.bookshelfData.length, shelfCmp) || changed;
+		}
+
+		for (const shelf of this.bookshelfData) {
+			if (bookCmp) {
+				const pinnedEnd = firstUnpinnedIndex(shelf.books);
+				changed = sortRange(shelf.books, 0, pinnedEnd, bookCmp) || changed;
+				changed = sortRange(shelf.books, pinnedEnd, shelf.books.length, bookCmp) || changed;
+			}
+			if (pageCmp) {
+				for (const book of shelf.books) {
+					changed = sortRange(book.pages, 0, book.pages.length, pageCmp) || changed;
+				}
+			}
+		}
+
+		if (changed) this.markDirty();
+	}
+
 	// ── Shelf mutations ───────────────────────────────────────────────────────────
 	addShelf() {
 		let newId;
@@ -100,6 +140,7 @@ class BookshelfStore {
 		} while (this.bookshelfData.some((s) => s.id === newId));
 		this.bookshelfData.push({ id: newId, title: `Shelf ${this.bookshelfData.length + 1}`, books: [] });
 		this.markDirty();
+		this.sortAll();
 	}
 
 	removeShelf(shelfId) {
@@ -125,7 +166,7 @@ class BookshelfStore {
 
 	renameShelf(shelfId, newTitle) {
 		const shelf = this.bookshelfData.find((s) => s.id === shelfId);
-		if (shelf) { shelf.title = newTitle; this.markDirty(); }
+		if (shelf) { shelf.title = newTitle; this.markDirty(); this.sortAll(); }
 	}
 
 	// ── Book mutations ────────────────────────────────────────────────────────────
@@ -139,7 +180,7 @@ class BookshelfStore {
 	renameBook(shelfId, bookId, newTitle) {
 		const shelf = this.bookshelfData.find((s) => s.id === shelfId);
 		const book = shelf?.books.find((b) => b.id === bookId);
-		if (book) { book.title = newTitle; this.markDirty(); }
+		if (book) { book.title = newTitle; this.markDirty(); this.sortAll(); }
 	}
 
 	toggleBookCollapsed(shelfId, bookId) {
@@ -166,6 +207,7 @@ class BookshelfStore {
 		const atBottomOfBlock = !book.pinned || settings.newPinsAtBottom;
 		shelf.books.splice(atBottomOfBlock ? firstUnpinnedIndex(shelf.books) : 0, 0, book);
 		this.markDirty();
+		this.sortAll();
 	}
 
 	// ── Import/export helpers ─────────────────────────────────────────────────────
@@ -223,6 +265,7 @@ class BookshelfStore {
 
 		this.markDirty();
 		this.tidy();
+		this.sortAll();
 		return true;
 	}
 

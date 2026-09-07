@@ -24,9 +24,36 @@ export const DEFAULT_SETTINGS = {
 	// ── Pinned books ──────────────────────────────────────────────────────────────
 	newPinsAtBottom: false,
 
+	// ── Sorting ───────────────────────────────────────────────────────────────────
+	sortPages: 'manual',    // SORT_OPTIONS lists the values these three accept
+	sortBooks: 'manual',
+	sortShelves: 'manual',
+
 	// ── Restoring pages ───────────────────────────────────────────────────────────
 	keepPagesOnRestore: false,
 	openInBackground: false
+};
+
+// The only settings that are not booleans: each lists the values it accepts, paired with
+// the label the settings panel shows. 'manual' means the list keeps the order it is given.
+export const SORT_OPTIONS = {
+	sortPages: [
+		['manual', 'Manually'],
+		['titleAsc', 'By name A..Z'],
+		['titleDesc', 'By name Z..A'],
+		['urlAsc', 'By address A..Z'],
+		['urlDesc', 'By address Z..A']
+	],
+	sortBooks: [
+		['manual', 'Manually'],
+		['titleAsc', 'By name A..Z'],
+		['titleDesc', 'By name Z..A']
+	],
+	sortShelves: [
+		['manual', 'Manually'],
+		['titleAsc', 'By name A..Z'],
+		['titleDesc', 'By name Z..A']
+	]
 };
 
 export const settings = $state({ ...DEFAULT_SETTINGS });
@@ -36,7 +63,8 @@ export const settings = $state({ ...DEFAULT_SETTINGS });
 export function applySettings(stored) {
 	for (const [key, fallback] of Object.entries(DEFAULT_SETTINGS)) {
 		const value = stored?.[key];
-		settings[key] = typeof value === typeof fallback ? value : fallback;
+		const known = SORT_OPTIONS[key]?.some(([option]) => option === value) ?? true;
+		settings[key] = typeof value === typeof fallback && known ? value : fallback;
 	}
 }
 
@@ -53,4 +81,20 @@ export function dragAnimation() {
 // The shape every new book starts with, wherever it is created.
 export function newBookFlags() {
 	return { collapsed: settings.newBooksCollapsed, locked: settings.newBooksLocked };
+}
+
+// Case and accents are ignored and embedded numbers compare as numbers, so 'Book 2' comes
+// before 'Book 10'.
+const collator = new Intl.Collator(undefined, { sensitivity: 'base', numeric: true });
+
+// How to order a list, or null when it keeps the order the user gave it. Array.sort is
+// stable, so equal keys leave the manual order between them untouched.
+export function comparator(option) {
+	switch (option) {
+		case 'titleAsc': return (a, b) => collator.compare(a.title, b.title);
+		case 'titleDesc': return (a, b) => collator.compare(b.title, a.title);
+		case 'urlAsc': return (a, b) => collator.compare(a.url, b.url);
+		case 'urlDesc': return (a, b) => collator.compare(b.url, a.url);
+		default: return null;
+	}
 }

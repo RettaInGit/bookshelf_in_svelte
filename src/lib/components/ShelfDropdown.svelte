@@ -2,8 +2,8 @@
 	import Sortable from 'sortablejs/modular/sortable.esm.js';  // mounts AutoScroll, not MultiDrag  ('complete' mounts the MultiDrag plugin)
 	import { bs } from '$lib/state/bookshelf.svelte.js';
 	import { focusAtEnd } from '$lib/utils/editable.js';
-	import { dragBehaviour } from '$lib/utils/dragSelection.js';
-	import { confirmAction, dragAnimation } from '$lib/state/settings.svelte.js';
+	import { dragBehaviour, restoreRow } from '$lib/utils/dragSelection.js';
+	import { settings, confirmAction, dragAnimation } from '$lib/state/settings.svelte.js';
 
 	let shelfListEl = $state(null);
 	let editingShelfId = $state(null);
@@ -69,10 +69,15 @@
 			...dragBehaviour('button'),
 			onEnd(evt) {
 				if (evt.oldIndex >= bs.bookshelfData.length || evt.newIndex >= bs.bookshelfData.length) return;
-				if (evt.newIndex !== evt.oldIndex) {
+				// Under a sort the drop does not get to choose the order, so Sortable's move is
+				// undone and sortAll() below is what redraws the list.
+				if (settings.sortShelves !== 'manual') {
+					restoreRow(shelfListEl, evt.item, evt.oldIndex);
+				} else if (evt.newIndex !== evt.oldIndex) {
 					bs.bookshelfData.splice(evt.newIndex, 0, bs.bookshelfData.splice(evt.oldIndex, 1)[0]);
 				}
 				bs.markDirty();
+				bs.sortAll();
 			}
 		});
 		return () => sortable.destroy();

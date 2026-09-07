@@ -33,6 +33,7 @@
 		bs.themePreference = data.themeSelected ?? 'system';
 		applySettings(data.settings);
 		bs.tidy();  // the settings are in place, so this honours the options the user chose
+		bs.sortAll();  // same for the order, and this is also the path background.js saves take
 		bs.loadingBookshelfData = false;
 	}
 
