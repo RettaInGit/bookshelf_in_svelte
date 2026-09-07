@@ -2,6 +2,7 @@
 	import { bs } from '$lib/state/bookshelf.svelte.js';
 	import { settings } from '$lib/state/settings.svelte.js';
 	import { openTab } from '$lib/chrome/storage.js';
+	import Highlighted from './Highlighted.svelte';
 
 	/** @type {{ page: any, bookId: string, shelfId: string, inDropArea?: boolean, visible?: boolean, onCheckboxChange?: () => void }} */
 	let { page, bookId, shelfId, inDropArea = false, visible = true, onCheckboxChange } = $props();
@@ -70,5 +71,5 @@
 		target="_blank"
 		title={page.url}
 		onclick={handleLinkClick}
-	><span class="pageLinkTitle">{page.title}</span>{#if settings.showPageUrls}<span class="pageLinkUrl">{page.url}</span>{/if}</a>
+	><span class="pageLinkTitle"><Highlighted text={page.title} on={!inDropArea} /></span>{#if settings.showPageUrls}<span class="pageLinkUrl"><Highlighted text={page.url} on={!inDropArea && settings.searchUrls} /></span>{/if}</a>
 </li>

@@ -17,6 +17,7 @@
     --color-accent: #7A5E1E;       /* dark enough to clear every surface on its own */
     --color-selected-bg: #EFE6CE;
     --color-drag: #8A7440;
+    --color-search-hit: #E9CE87;
 
     /* --- Button Colors --- */
     --color-button-primary: #7A6247;
@@ -56,6 +57,7 @@
     --color-accent: #DDBE72;
     --color-selected-bg: #6E5C42;
     --color-drag: #DDBE72;
+    --color-search-hit: #A6802F;
 
     /* --- Button Colors --- */
     --color-button-primary: #7E6749;
@@ -699,6 +701,15 @@ svg path {
 .pageLinkUrl {
     font-size: 12px;
     color: var(--color-text-muted);
+}
+
+/* Without this <mark> keeps the UA's yellow on black, which belongs to neither theme.
+   The text colour is the theme's own, so it flips with it. */
+.searchHit {
+    background-color: var(--color-search-hit);
+    color: var(--color-text-primary);
+    border-radius: 2px;
+    padding: 0 1px;
 }
 
 .bookListItem {
