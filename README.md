@@ -12,7 +12,7 @@ An enhanced version of [OneTab](https://www.one-tab.com/) where you can more eas
 
 # LICENSE
 
-This is an open source project, you can download and modify it as you like.
+This is a [FOSS](https://en.wikipedia.org/wiki/Free_and_open-source_software) project, you can download and modify it as you like.
 
 
 # HOW TO BUILD
@@ -26,7 +26,7 @@ Running `pnpm build` creates the `build` folder which contains the actual code u
 - [x] Pin favorite books
 - [x] Check duplicate pages inside a book
 - [x] Sort pages or books by name
-- [ ] Visualize only X pages if there are more than X in a book
+- [ ] ~~Visualize only X pages if there are more than X in a book~~
 - [x] Add settings in the settings page
-- [ ] All text should be only in one row (add "..." at the end if it's too long)
+- [ ] ~~All text should be only in one row (add "..." at the end if it's too long)~~
 - [ ] Page names should be editable
