@@ -1,7 +1,7 @@
 <script>
 	import PageList from './PageList.svelte';
 	import { bs } from '$lib/state/bookshelf.svelte.js';
-	import { settings, confirmAction } from '$lib/state/settings.svelte.js';
+	import { confirmAction } from '$lib/state/settings.svelte.js';
 	import { openTab } from '$lib/chrome/storage.js';
 	import { focusAtEnd } from '$lib/utils/editable.js';
 
@@ -98,7 +98,7 @@
 		const pagesToRestore = selectedIndexes.map((i) => b.pages[i]);
 		pagesToRestore.forEach((p) => openTab(p.url));
 
-		if (!b.locked && !settings.keepPagesOnRestore) {
+		if (!b.locked) {
 			if (pagesToRestore.length === b.pages.length) {
 				for (let i = bs.pagesToMove.length - 1; i >= 0; i--) {
 					const item = bs.pagesToMove[i];

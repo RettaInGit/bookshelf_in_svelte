@@ -57,7 +57,6 @@
 		<div class="settingsRow">
 			<div class="settingsRowText">
 				<span>Theme</span>
-				<small>'System' follows the theme your browser is set to.</small>
 			</div>
 			<div class="settingsChoice">
 				{#each [['light', 'Light'], ['dark', 'Dark'], ['system', 'System']] as [value, label] (value)}
@@ -293,17 +292,6 @@
 
 	<section class="settingsSection">
 		<h3>Restoring pages</h3>
-
-		<div class="settingsRow">
-			<div class="settingsRowText">
-				<span>Keep pages after opening them</span>
-				<small>Opening a page no longer removes it, as if every book were locked.</small>
-			</div>
-			<label class="switch">
-				<input type="checkbox" bind:checked={settings.keepPagesOnRestore} />
-				<span class="slider"></span>
-			</label>
-		</div>
 
 		<div class="settingsRow">
 			<div class="settingsRowText">

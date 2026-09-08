@@ -30,7 +30,6 @@ export const DEFAULT_SETTINGS = {
 	sortShelves: 'manual',
 
 	// ── Restoring pages ───────────────────────────────────────────────────────────
-	keepPagesOnRestore: false,
 	openInBackground: false
 };
 

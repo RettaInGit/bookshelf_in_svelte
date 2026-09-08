@@ -24,7 +24,7 @@
 
 		const shelf = bs.bookshelfData.find((s) => s.id === shelfId);
 		const book = shelf?.books.find((b) => b.id === bookId);
-		if (!book || book.locked || settings.keepPagesOnRestore) return;
+		if (!book || book.locked) return;
 
 		// remove from drop area staging
 		const moveIdx = bs.pagesToMove.findIndex(
