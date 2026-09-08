@@ -18,15 +18,3 @@ This is a [FOSS](https://en.wikipedia.org/wiki/Free_and_open-source_software) pr
 # HOW TO BUILD
 
 Running `pnpm build` creates the `build` folder which contains the actual code used by this extension.
-
-
-# FUTURE IMPLEMENTATIONS
-
-- [x] Use the checkbox to multi-select the pages to drag and drop
-- [x] Pin favorite books
-- [x] Check duplicate pages inside a book
-- [x] Sort pages or books by name
-- [ ] ~~Visualize only X pages if there are more than X in a book~~
-- [x] Add settings in the settings page
-- [ ] ~~All text should be only in one row (add "..." at the end if it's too long)~~
-- [ ] Page names should be editable
