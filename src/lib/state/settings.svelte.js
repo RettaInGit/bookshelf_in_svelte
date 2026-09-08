@@ -15,6 +15,7 @@ export const DEFAULT_SETTINGS = {
 	// ── Saving pages ──────────────────────────────────────────────────────────────
 	keepTabsOpen: false,
 	savePinnedTabs: false,
+	saveTabGroups: false,
 	newBooksAtBottom: false,
 	newBooksCollapsed: false,
 	newBooksLocked: false,

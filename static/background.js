@@ -8,6 +8,7 @@ function generateUUID() {
 const SETTINGS_DEFAULTS = {
   keepTabsOpen: false,
   savePinnedTabs: false,
+  saveTabGroups: false,
   newBooksAtBottom: false,
   newBooksCollapsed: false,
   newBooksLocked: false,
@@ -20,9 +21,65 @@ async function loadSettings() {
   return { ...SETTINGS_DEFAULTS, ...(data.settings ?? {}) };
 }
 
-// A tab qualifies unless it is pinned (opt-in) or is not a web page
+// The id a tab out of every group reports. The constant lives in chrome.tabGroups,
+// which is only there with the 'tabGroups' permission.
+const NO_GROUP = -1;
+
+// groupId is missing altogether on a Chrome too old to know about groups
+const isGrouped = (tab) => tab.groupId !== undefined && tab.groupId !== NO_GROUP;
+
+// A tab qualifies unless it is pinned, is in a tab group, or is not a web page. Both
+// pinned and grouped tabs are opt-in, and a tab that does not qualify is left entirely
+// alone: the batch never sees it, so it is neither saved nor closed.
 function isSavable(tab, settings) {
-  return (settings.savePinnedTabs || !tab.pinned) && tab.url.startsWith('http');
+  if (tab.pinned && !settings.savePinnedTabs) return false;
+  if (isGrouped(tab) && !settings.saveTabGroups) return false;
+  return tab.url.startsWith('http');
+}
+
+// Chrome shows an unnamed group by its colour, so a book named after one does the same
+function groupBookTitle(group) {
+  const title = group.title?.trim();
+  if (title) return title;
+  return `${group.color.charAt(0).toUpperCase()}${group.color.slice(1)} group`;
+}
+
+// The titles the batch needs, by group id. isSavable() already dropped every grouped tab
+// unless the setting asks for them, so this only has to survive a missing API or a denied
+// permission: without one, every tab stays ungrouped and the batch is one book.
+async function groupTitles(tabs, settings) {
+  const titles = new Map();
+  if (!settings.saveTabGroups || !chrome.tabGroups) return titles;
+
+  for (const id of new Set(tabs.filter(isGrouped).map(tab => tab.groupId))) {
+    try {
+      titles.set(id, groupBookTitle(await chrome.tabGroups.get(id)));
+    } catch (err) {
+      console.error('Tab group lookup failed:', err);   // its tabs fall back to one book
+    }
+  }
+  return titles;
+}
+
+// One book per group whose title is known, plus one holding every ungrouped tab, ordered
+// by the first tab of each: the books come out in the order the tabs are in. With no
+// titles this is the single book the batch has always been.
+function splitIntoBooks(tabs, titles) {
+  const batches = [];
+  const byGroup = new Map();
+
+  tabs.forEach(tab => {
+    const key = titles.has(tab.groupId) ? tab.groupId : NO_GROUP;
+    let batch = byGroup.get(key);
+    if (!batch) {
+      batch = { title: titles.get(key) ?? null, tabs: [] };
+      byGroup.set(key, batch);
+      batches.push(batch);
+    }
+    batch.tabs.push(tab);
+  });
+
+  return batches;
 }
 
 // Open extension page when its icon is clicked
@@ -120,12 +177,8 @@ async function savePages(tabs, settings) {
   // Check if there are any pages to save
   if (tabs.length === 0) return;
 
-  // Map the filtered tabs to get their title and URL for the pages
-  const newPages = tabs.map(tab => ({
-    id: generateUUID(),
-    title: tab.title,
-    url: tab.url
-  }));
+  // Split the batch into the books it will become, before anything is read or written
+  const batches = splitIntoBooks(tabs, await groupTitles(tabs, settings));
 
   // Retrieve bookshelf saved data to determine the default book title and save it
   let bookshelfData;
@@ -163,54 +216,59 @@ async function savePages(tabs, settings) {
     shelf = newShelf;
   }
 
-  // Drop the duplicates the settings ask for. The batch becomes one book, so the per-book
-  // flag dedupes within it, and the per-shelf flag also compares against what is already
-  // filed. Empty books are left to the app, which sweeps them on load; nothing here can
-  // create one. The tabs are closed either way, since a skipped page is already saved.
-  if (settings.removeDuplicatesInBook || settings.removeDuplicatesInShelf) {
-    const seen = new Set();
-    if (settings.removeDuplicatesInShelf) {
-      shelf.books.forEach(book => book.pages.forEach(page => seen.add(page.url)));
-    }
-    for (let i = newPages.length - 1; i >= 0; i--) {
-      if (seen.has(newPages[i].url)) newPages.splice(i, 1);
-      else seen.add(newPages[i].url);
-    }
-
-    // Everything was a duplicate: nothing to file, but the tabs still go away
-    if (newPages.length === 0) {
-      chrome.storage.local.set({ 'selectedShelfId': selectedShelfId, 'bookshelfData': bookshelfData }, () => {
-        if (!settings.keepTabsOpen) chrome.tabs.remove(tabs.map(tab => tab.id));
-        chrome.runtime.sendMessage({ action: 'bookshelfUpdated' });
-      });
-      return;
-    }
+  // Drop the duplicates the settings ask for. The per-book flag starts a fresh set for
+  // every book the batch produces, so a page saved from two groups survives in both; the
+  // per-shelf flag also compares against what is already filed and keeps its set across
+  // the whole batch, or one save could leave two copies in the shelf. Empty books are
+  // left to the app, which sweeps them on load; nothing here can create one. The tabs are
+  // closed either way, since a skipped page is already saved.
+  const dedupe = settings.removeDuplicatesInBook || settings.removeDuplicatesInShelf;
+  const seen = new Set();
+  if (settings.removeDuplicatesInShelf) {
+    shelf.books.forEach(book => book.pages.forEach(page => seen.add(page.url)));
   }
 
-  // Create new book ID
-  let newBookId;
-  do {
-    newBookId = generateUUID();
-  } while(shelf.books.some(book => book.id === newBookId));
+  // Pinned books hold the head of the list; mirrors firstUnpinnedIndex() in the app. The
+  // books of one save go in consecutively: all inserted at the same spot they would come
+  // out reversed.
+  const firstUnpinned = shelf.books.findIndex(book => !book.pinned);
+  let insertAt = (settings.newBooksAtBottom || firstUnpinned === -1)
+    ? shelf.books.length
+    : firstUnpinned;
 
-  // Create default book title as 'Book X'
-  let defaultBookTitle = `Book ${shelf.books.length + 1}`;
+  batches.forEach(batch => {
+    if (dedupe && !settings.removeDuplicatesInShelf) seen.clear();
 
-  // Add the new book where the settings ask for it
-  const newBook = {
-    id: newBookId,
-    title: defaultBookTitle,
-    pages: newPages,
-    collapsed: settings.newBooksCollapsed,
-    locked: settings.newBooksLocked
-  };
-  // Pinned books hold the head of the list; mirrors firstUnpinnedIndex() in the app
-  if (settings.newBooksAtBottom) {
-    shelf.books.push(newBook);
-  } else {
-    const firstUnpinned = shelf.books.findIndex(book => !book.pinned);
-    shelf.books.splice(firstUnpinned === -1 ? shelf.books.length : firstUnpinned, 0, newBook);
-  }
+    const newPages = batch.tabs.map(tab => ({
+      id: generateUUID(),
+      title: tab.title,
+      url: tab.url
+    }));
+    if (dedupe) {
+      for (let i = newPages.length - 1; i >= 0; i--) {
+        if (seen.has(newPages[i].url)) newPages.splice(i, 1);
+        else seen.add(newPages[i].url);
+      }
+    }
+    if (newPages.length === 0) return;   // nothing left to file, the tabs still go away
+
+    // Create new book ID
+    let newBookId;
+    do {
+      newBookId = generateUUID();
+    } while(shelf.books.some(book => book.id === newBookId));
+
+    // A group lends the book its name; everything else is 'Book X', numbered as the shelf
+    // grows so that two books born of one save cannot share a number
+    shelf.books.splice(insertAt, 0, {
+      id: newBookId,
+      title: batch.title ?? `Book ${shelf.books.length + 1}`,
+      pages: newPages,
+      collapsed: settings.newBooksCollapsed,
+      locked: settings.newBooksLocked
+    });
+    insertAt++;
+  });
 
   // Save the updated bookshelf data to storage
   chrome.storage.local.set({ 'selectedShelfId': selectedShelfId, 'bookshelfData': bookshelfData }, () => {

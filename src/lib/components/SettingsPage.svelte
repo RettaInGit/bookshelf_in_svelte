@@ -183,6 +183,17 @@
 
 		<div class="settingsRow">
 			<div class="settingsRowText">
+				<span>Save tab groups too</span>
+				<small>Tabs in a group are saved too, each group as a book of its own.</small>
+			</div>
+			<label class="switch">
+				<input type="checkbox" bind:checked={settings.saveTabGroups} />
+				<span class="slider"></span>
+			</label>
+		</div>
+
+		<div class="settingsRow">
+			<div class="settingsRowText">
 				<span>Add new books at the bottom</span>
 				<small>Applies to saved tabs and to an import into the current shelf.</small>
 			</div>
