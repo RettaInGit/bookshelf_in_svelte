@@ -94,7 +94,7 @@
 		<div class="settingsRow">
 			<div class="settingsRowText">
 				<span>Show website icons</span>
-				<small>Each icon is fetched from an external service, which sees the page URLs.</small>
+				<small>Add the page icon next to each page title.</small>
 			</div>
 			<label class="switch">
 				<input type="checkbox" bind:checked={settings.remoteFavicons} />

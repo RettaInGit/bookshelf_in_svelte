@@ -620,13 +620,8 @@ svg path {
     border-bottom: 1px solid var(--color-border-page);
 }
 
-.pageListItem > input, .pageListItem > img, .pageIconPlaceholder {
+.pageListItem > input, .pageListItem > img {
     flex-shrink: 0;
-}
-
-.pageIconPlaceholder {
-    margin-right: 10px;
-    opacity: 0.5;
 }
 
 /* every draggable row; the controls inside keep the pointer from the global button/checkbox rules */
