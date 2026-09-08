@@ -5,6 +5,7 @@ export const DEFAULT_SETTINGS = {
 	// ── Appearance ────────────────────────────────────────────────────────────────
 	showPageUrls: false,
 	searchUrls: false,
+	searchOtherShelves: false,
 	remoteFavicons: true,      // page icons come from an external service, so they are opt-out
 	fullWidthLayout: false,
 	hideDropAreaButton: false,

@@ -92,6 +92,17 @@
 
 		<div class="settingsRow">
 			<div class="settingsRowText">
+				<span>Search other shelves too</span>
+				<small>When nothing here matches, name the shelves that do.</small>
+			</div>
+			<label class="switch">
+				<input type="checkbox" bind:checked={settings.searchOtherShelves} />
+				<span class="slider"></span>
+			</label>
+		</div>
+
+		<div class="settingsRow">
+			<div class="settingsRowText">
 				<span>Show website icons</span>
 				<small>Add the page icon next to each page title.</small>
 			</div>

@@ -154,6 +154,29 @@ svg path {
     color: var(--color-text-muted);
 }
 
+/* Takes the result message's place, so it keeps its spacing and its centring */
+#otherShelves {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+    color: var(--color-text-muted);
+}
+
+/* A shelf title can be long, and without a cap the row would push the page sideways */
+.otherShelfButton {
+    max-width: 240px;
+    margin: 0;
+    padding: 4px 10px;
+    font-family: 'Lora', serif;
+    font-size: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .emptyBookMessage {
     text-align: center;
     margin: 0;

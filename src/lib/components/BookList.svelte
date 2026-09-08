@@ -8,14 +8,29 @@
 
 	let listEl = $state(null);
 
+	const hasMatch = (shelf) => shelf.books.some((b) => b.pages.some((p) => bs.matches(p)));
+	const noMatches = $derived(!!bs.searchQuery && !!bs.currentShelf && !hasMatch(bs.currentShelf));
+
+	// Only worth naming when the search comes up empty here. The other shelves go through
+	// the same bs.matches(), so 'Search URLs too' reaches them as well.
+	const otherShelvesWithMatches = $derived.by(() => {
+		if (!settings.searchOtherShelves || !noMatches) return [];
+		return bs.bookshelfData.filter((s) => s.id !== bs.selectedShelfId && hasMatch(s));
+	});
+
 	const resultMessage = $derived.by(() => {
 		if (bs.loadingBookshelfData) return 'Loading your bookshelf...';
 		const shelf = bs.currentShelf;
 		if (!shelf) return 'Error when loading the shelf. Try to reload the extension.';
-		if (shelf.books.length === 0) return 'No pages saved. Try adding some.';
-		if (bs.searchQuery && !shelf.books.some((b) => b.pages.some((p) => bs.matches(p)))) {
-			return 'No pages match your search.';
+		// A search answers about itself: even an empty shelf reports the miss, and the
+		// shelves that do match say more than any message could, so they take its place.
+		if (bs.searchQuery) {
+			if (!noMatches || otherShelvesWithMatches.length > 0) return '';
+			return settings.searchOtherShelves && bs.bookshelfData.length > 1
+				? 'No pages match your search in any shelf.'
+				: 'No pages match your search.';
 		}
+		if (shelf.books.length === 0) return 'No pages saved. Try adding some.';
 		return '';
 	});
 
@@ -129,6 +144,15 @@
 
 {#if resultMessage}
 	<p id="resultMessage">{resultMessage}</p>
+{/if}
+
+{#if otherShelvesWithMatches.length > 0}
+	<div id="otherShelves">
+		<span>Found in these shelves:</span>
+		{#each otherShelvesWithMatches as shelf (shelf.id)}
+			<button class="otherShelfButton" onclick={() => bs.selectShelf(shelf.id)}>{shelf.title}</button>
+		{/each}
+	</div>
 {/if}
 
 <div id="bookList" class:fullWidth={settings.fullWidthLayout} bind:this={listEl}>
