@@ -141,6 +141,7 @@ class BookshelfStore {
 		this.bookshelfData.push({ id: newId, title: `Shelf ${this.bookshelfData.length + 1}`, books: [] });
 		this.markDirty();
 		this.sortAll();
+		return newId;
 	}
 
 	removeShelf(shelfId) {
