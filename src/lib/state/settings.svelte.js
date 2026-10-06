@@ -31,6 +31,9 @@ export const DEFAULT_SETTINGS = {
 	sortBooks: 'manual',
 	sortShelves: 'manual',
 
+	// ── Shelves ───────────────────────────────────────────────────────────────────
+	closeShelvesOnSelect: true,
+
 	// ── Restoring pages ───────────────────────────────────────────────────────────
 	openInBackground: false
 };

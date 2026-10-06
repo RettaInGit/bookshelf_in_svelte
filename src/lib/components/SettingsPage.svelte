@@ -298,6 +298,21 @@
 	</section>
 
 	<section class="settingsSection">
+		<h3>Shelves</h3>
+
+		<div class="settingsRow">
+			<div class="settingsRowText">
+				<span>Close the shelf list after choosing</span>
+				<small>Picking a shelf also folds the list away.</small>
+			</div>
+			<label class="switch">
+				<input type="checkbox" bind:checked={settings.closeShelvesOnSelect} />
+				<span class="slider"></span>
+			</label>
+		</div>
+	</section>
+
+	<section class="settingsSection">
 		<h3>Pinned books</h3>
 
 		<div class="settingsRow">

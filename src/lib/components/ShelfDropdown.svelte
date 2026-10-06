@@ -12,6 +12,7 @@
 	function handleSelectShelf(shelfId) {
 		if (editingShelfId === shelfId) return;
 		bs.selectShelf(shelfId);
+		if (settings.closeShelvesOnSelect) bs.shelvesOpen = false;
 	}
 
 	function startEditShelf(shelfId, e) {
