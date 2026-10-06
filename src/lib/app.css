@@ -955,3 +955,8 @@ input:checked + .slider:before {
     color: var(--color-text-primary);
     font-weight: bold;
 }
+
+/* Either side is a choice, not an 'on', so the track keeps its neutral color */
+.toggle-group input:checked + .slider {
+    background-color: var(--color-border-page);
+}
