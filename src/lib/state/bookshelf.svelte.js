@@ -220,30 +220,54 @@ class BookshelfStore {
 		let currentShelf = null;
 		let currentBook = null;
 
+		// A book or a page with nothing named above it opens a placeholder parent, whose title
+		// stays null until it is known where it lands
+		const openShelf = () => {
+			if (!currentShelf) {
+				currentShelf = { id: generateUUID(), title: null, books: [] };
+				newData.push(currentShelf);
+			}
+			return currentShelf;
+		};
+		const openBook = () => {
+			if (!currentBook) {
+				currentBook = { id: generateUUID(), title: null, pages: [], ...newBookFlags() };
+				openShelf().books.push(currentBook);
+			}
+			return currentBook;
+		};
+
 		try {
 			lines.forEach((line) => {
-				if (!line.trim()) return;
-				if (line.startsWith('        ')) {
-					if (currentBook) {
+				// a blank line ends the book, as the export writes one after each
+				if (!line.trim()) { currentBook = null; return; }
+
+				const startSpaces = line.length - line.trimStart().length;
+
+				switch (startSpaces) {
+					case 8: {
 						const pageText = line.trim();
 						const pipeIndex = pageText.indexOf('|');
 						if (pipeIndex !== -1) {
-							currentBook.pages.push({
+							openBook().pages.push({
 								id: generateUUID(),
 								url: pageText.substring(0, pipeIndex).trim(),
 								title: pageText.substring(pipeIndex + 1).trim()
 							});
 						}
-					}
-				} else if (line.startsWith('    ')) {
-					if (currentShelf) {
+					} break;
+					case 4: {
 						currentBook = { id: generateUUID(), title: line.trim(), pages: [], ...newBookFlags() };
-						currentShelf.books.push(currentBook);
-					}
-				} else {
-					currentShelf = { id: generateUUID(), title: line.trim(), books: [] };
-					newData.push(currentShelf);
-					currentBook = null;
+						openShelf().books.push(currentBook);
+					} break;
+					case 0: {
+						currentShelf = { id: generateUUID(), title: line.trim(), books: [] };
+						newData.push(currentShelf);
+						currentBook = null;
+					} break;
+					default: {
+						// Ignore lines with unexpected indentation
+					} break;
 				}
 			});
 		} catch (err) {
@@ -252,14 +276,20 @@ class BookshelfStore {
 
 		if (newData.length === 0) return false;
 
+		// Placeholders are numbered as the list they land in grows, like the books saved from tabs
 		if (!importAsNewShelf) {
 			const shelf = this.bookshelfData.find((s) => s.id === this.selectedShelfId);
 			const imported = newData.flatMap((s) => s.books);
 			if (shelf) {
+				imported.forEach((book, i) => { book.title ??= `Book ${shelf.books.length + i + 1}`; });
 				if (settings.newBooksAtBottom) shelf.books.push(...imported);
 				else shelf.books.splice(firstUnpinnedIndex(shelf.books), 0, ...imported);
 			}
 		} else {
+			newData.forEach((shelf, i) => {
+				shelf.title ??= `Shelf ${this.bookshelfData.length + i + 1}`;
+				shelf.books.forEach((book, j) => { book.title ??= `Book ${j + 1}`; });
+			});
 			this.bookshelfData.push(...newData);
 			this.selectedShelfId = newData[0].id;
 		}
