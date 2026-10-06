@@ -81,28 +81,6 @@
 
 		<div class="settingsRow">
 			<div class="settingsRowText">
-				<span>Search URLs too</span>
-				<small>The search box matches page URLs as well as titles.</small>
-			</div>
-			<label class="switch">
-				<input type="checkbox" bind:checked={settings.searchUrls} />
-				<span class="slider"></span>
-			</label>
-		</div>
-
-		<div class="settingsRow">
-			<div class="settingsRowText">
-				<span>Search other shelves too</span>
-				<small>When nothing here matches, name the shelves that do.</small>
-			</div>
-			<label class="switch">
-				<input type="checkbox" bind:checked={settings.searchOtherShelves} />
-				<span class="slider"></span>
-			</label>
-		</div>
-
-		<div class="settingsRow">
-			<div class="settingsRowText">
 				<span>Show website icons</span>
 				<small>Add the page icon next to each page title.</small>
 			</div>
@@ -152,6 +130,32 @@
 			</div>
 			<label class="switch">
 				<input type="checkbox" bind:checked={settings.reduceAnimations} />
+				<span class="slider"></span>
+			</label>
+		</div>
+	</section>
+
+	<section class="settingsSection">
+		<h3>Search</h3>
+
+		<div class="settingsRow">
+			<div class="settingsRowText">
+				<span>Search URLs too</span>
+				<small>The search box matches page URLs as well as titles.</small>
+			</div>
+			<label class="switch">
+				<input type="checkbox" bind:checked={settings.searchUrls} />
+				<span class="slider"></span>
+			</label>
+		</div>
+
+		<div class="settingsRow">
+			<div class="settingsRowText">
+				<span>Search other shelves too</span>
+				<small>When nothing here matches, name the shelves that do.</small>
+			</div>
+			<label class="switch">
+				<input type="checkbox" bind:checked={settings.searchOtherShelves} />
 				<span class="slider"></span>
 			</label>
 		</div>
