@@ -17,6 +17,8 @@
 
 	function startEditShelf(shelfId, e) {
 		e.stopPropagation();
+		// the pencil keeps the focus where it is, so no blur has saved the edit still open
+		if (!settleOpenEdit()) return;
 		editingShelfId = shelfId;
 	}
 
@@ -27,6 +29,15 @@
 		if (!newTitle) { alert('Shelf title cannot be empty.'); el?.focus(); return; }
 		bs.renameShelf(shelfId, newTitle);
 		editingShelfId = null;
+	}
+
+	// Before another edit starts, the open one is saved, or reported and kept open when its
+	// title is empty. Returns whether the way is clear.
+	function settleOpenEdit() {
+		// a shelf removed while being edited took its edit with it
+		if (!bs.bookshelfData.some((s) => s.id === editingShelfId)) editingShelfId = null;
+		if (editingShelfId) saveShelfTitle(editingShelfId);
+		return !editingShelfId;
 	}
 
 	// Blur must not validate: alert() takes focus off the page, which would re-enter here
@@ -52,24 +63,28 @@
 	let selectWholeTitle = false;
 
 	function handleAddShelf() {
+		// the blur before this click skipped an emptied title, so this is where it is reported
+		if (!settleOpenEdit()) return;
 		selectWholeTitle = true;
 		editingShelfId = bs.addShelf();
 	}
 
 	let editedShelfEl = null;
 
+	// Tidies the title left behind, whether the edit ended or moved to another shelf, then
+	// focuses the one being edited
 	$effect(() => {
-		if (editingShelfId) {
-			editedShelfEl = titleEls[editingShelfId];
-			if (selectWholeTitle) focusAndSelectAll(editedShelfEl);
-			else focusAtEnd(editedShelfEl);
-			selectWholeTitle = false;
-		} else if (editedShelfEl) {
+		if (editedShelfEl) {
 			// the trimmed text is what was just saved, so it also drops markup a paste left behind
 			if (editedShelfEl.childElementCount > 0) editedShelfEl.textContent = editedShelfEl.textContent.trim();
 			editedShelfEl.scrollLeft = 0;
-			editedShelfEl = null;
 		}
+		editedShelfEl = editingShelfId ? titleEls[editingShelfId] : null;
+		if (editedShelfEl) {
+			if (selectWholeTitle) focusAndSelectAll(editedShelfEl);
+			else focusAtEnd(editedShelfEl);
+		}
+		selectWholeTitle = false;
 	});
 
 	$effect(() => {
